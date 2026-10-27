@@ -12,7 +12,8 @@ This reference maps the principal modules to their public operations. For call o
 
 ## Local Data and Plugin Loading — `src/local-data-store.js`
 
-- `LocalDataStore` is the persistent JSON record implementation. Its operations and failure behavior are documented in [Data Models](data-models.md).
+- `LocalDataStore` is the persistent local JSON record implementation. Its operations and failure behavior are documented in [Data Models](data-models.md).
+- `ConfiguredDataStore` routes each record area to local JSON or a PostgreSQL table configured in `datastores`; PostgreSQL tables store `id` and `data JSONB`, and are initialized at startup. Unconfigured areas remain local.
 - `PluginLoader({ pluginDirectories, appContext }).loadAll()` scans direct children for `.js` files, dynamically imports them, and invokes a default function or `.register(appContext)`. The filename becomes the plugin name.
 - Loading does not inspect ACLs, authenticate users, or wrap plugin methods. It is registration/instantiation only.
 
@@ -21,6 +22,7 @@ This reference maps the principal modules to their public operations. For call o
 - `connect(areaName, config)` stores an area config and accepts only `file` or `sql`.
 - `read`, `write`, and `query` dispatch on the stored type. File mode reads/writes one JSON object. SQL mode currently uses in-memory rows and recognizes a small set of `SELECT` patterns; it is not connected to a SQL server.
 - `getConnection(areaName)` throws when the area has not been configured.
+- This legacy utility is not the application's persistent PostgreSQL datastore; use `ConfiguredDataStore` for runtime record areas.
 
 ## Access Control — `src/access-control.js`
 
@@ -46,4 +48,4 @@ This reference maps the principal modules to their public operations. For call o
 
 ## Web Dashboard — `src/web-server.js`, `src/app-runtime.js`, `public/`
 
-`createDashboardServer(runtime)` accepts only GET, serves three static paths and `GET /api/dashboard`, and emits basic content/security headers. `buildDashboardData()` selects safe user and store fields; see [Runtime Flow](runtime-flow.md). There is no login, session, or ACL check in the web request handler, so it must not be treated as an authenticated administrative console when exposed publicly.
+`createDashboardServer(runtime)` protects dashboard assets and data with signed Google sessions. The public root serves the login page; authenticated requests can load the dashboard and `GET /api/dashboard`. `buildDashboardData()` selects safe user and store fields; see [Runtime Flow](runtime-flow.md). The web handler does not invoke `AccessControlPlugin.canAccess()`, so configured ACL decisions are not enforced for dashboard routes.

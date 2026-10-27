@@ -26,6 +26,33 @@
 
 `ConfigLoader` expands environment placeholders recursively. Do not store literal credentials in the JSON file. The bootstrap strips fields whose names resemble token/password/secret/credential/API key/access key before persisting a store record.
 
+## Mixed File and PostgreSQL Datastores
+
+The application runtime routes each record area independently. Areas omitted from `datastores` and areas configured as `file` use `LocalDataStore` under `data/<area>/<key>.json`. The checked-in runtime configuration routes users, groups, organizations, user environments, and ACLs to PostgreSQL; stores and virtual machines remain local. Configure a PostgreSQL-backed area with its type and an optional table name:
+
+```json
+{
+  "datastores": {
+    "users": {
+      "type": "postgres",
+      "table": "users"
+    },
+    "organizations": { "type": "postgres" },
+    "user-environments": {
+      "type": "postgres"
+    }
+  }
+}
+```
+
+Each configured PostgreSQL area uses its own table with `id TEXT PRIMARY KEY` and `data JSONB NOT NULL`; the datastore key is stored in `id` and the complete JSON record in `data`. Table names default to the area name, with hyphens normalized to underscores (for example `user-environments` becomes `user_environments`), and must be simple PostgreSQL identifiers. The runtime shares one connection pool across PostgreSQL areas. The service creates missing tables on startup; [`sql/schema.sql`](../../sql/schema.sql) also provides idempotent DDL for the standard areas.
+
+Configure database connection details with the runtime variables `DATABASE_HOST`, `DATABASE_PORT`, `DATABASE_DBNAME`, `DATABASE_USER`, and `DATABASE_PASSWORD`. These are read only when at least one area uses PostgreSQL. All five values are required, and `DATABASE_PORT` must be between 1 and 65535; startup fails if configuration is incomplete or database/table initialization fails. Set these values in the deployment environment or secret provider, never in committed JSON. Use a PostgreSQL role with only the permissions required to create and access the configured tables.
+
+The same `read`, `write`, `list`, and `delete` datastore interface is used by bootstrap and plugins regardless of backend. Writes upsert JSON records. Delete preserves the existing local-store contract by replacing a record's data with `{}` rather than removing its row. SQL-backed areas are persistent PostgreSQL tables; this is separate from `UniversalConnectionManager`, whose SQL mode remains an in-memory prototype.
+
+Changing an area's backend does not migrate or copy existing records. Plan and perform any local JSON-to-PostgreSQL data migration before switching that area's `type`; otherwise the runtime reads from the newly selected backend, which may initially be empty.
+
 ## LocalDataStore Layout
 
 `LocalDataStore(rootDir)` maps each call to a JSON file:

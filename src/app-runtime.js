@@ -1,19 +1,23 @@
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { HubRegistry, McpHub, buildHubSummary, createDefaultRegistry } from './hub-engine.js';
-import { LocalDataStore, PluginLoader } from './local-data-store.js';
+import { PluginLoader } from './local-data-store.js';
+import { createConfiguredDataStore, getPostgresConfigFromEnvironment } from './configured-data-store.js';
 import { createDefaultLogger } from './logger.js';
 import { ConfigLoader, bootstrapEnvironmentData } from './config-loader.js';
 
 const DEFAULT_ROOT = resolve(fileURLToPath(new URL('..', import.meta.url)));
 
-export async function createApplicationRuntime({ rootDir = DEFAULT_ROOT } = {}) {
+export async function createApplicationRuntime({
+  rootDir = DEFAULT_ROOT,
+  poolFactory,
+  databaseConfig,
+} = {}) {
   const registry = createDefaultRegistry();
   const summary = {
     status: registry.status(),
     hubs: buildHubSummary(registry.list()),
   };
-  const datastore = new LocalDataStore(resolve(rootDir, 'data'));
   const logger = createDefaultLogger({ logDir: resolve(rootDir, 'logs') });
   const configPath = resolve(rootDir, 'config/app.env.json');
   let startupConfig;
@@ -28,6 +32,19 @@ export async function createApplicationRuntime({ rootDir = DEFAULT_ROOT } = {}) 
     startupConfig = await new ConfigLoader(fallbackPath).load();
   }
 
+  const datastoreAreas = startupConfig.datastores || {};
+  const usesPostgres = Object.values(datastoreAreas)
+    .some((config) => String(config?.type || 'file').toLowerCase() === 'postgres');
+  const postgresConfig = usesPostgres
+    ? databaseConfig || getPostgresConfigFromEnvironment()
+    : undefined;
+  const datastore = createConfiguredDataStore({
+    rootDir: resolve(rootDir, 'data'),
+    areas: datastoreAreas,
+    databaseConfig: postgresConfig,
+    poolFactory,
+  });
+  await datastore.initialize();
   await bootstrapEnvironmentData(datastore, startupConfig);
 
   const pluginLoader = new PluginLoader({
@@ -106,7 +123,7 @@ export async function buildDashboardData(runtime) {
     application: {
       name: 'MCP Uni Hubs',
       configFile: runtime.configPath.slice(runtime.rootDir.length + 1),
-      datastore: 'Local JSON datastore',
+      datastore: runtime.datastore.description || 'Local JSON datastore',
       logLevel: runtime.logger.level,
       instanceId: runtime.logger.instanceId,
     },

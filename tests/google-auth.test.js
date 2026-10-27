@@ -124,10 +124,10 @@ test('unauthenticated / serves dedicated login page', async () => {
       assert.match(html, /ACL security architecture/);
       assert.match(html, /Network and connectivity/);
       assert.match(html, /LocalDataStore · data\/\*\.json/);
-      assert.match(html, /UniversalConnectionManager/);
-      assert.match(html, /in-memory prototype only/);
-      assert.match(html, /no external DB connection/);
-      assert.match(html, /not a live network connection/);
+      assert.match(html, /ConfiguredDataStore/);
+      assert.match(html, /PostgreSQL tables/);
+      assert.match(html, /DATABASE_HOST · PORT · DBNAME/);
+      assert.match(html, /DATABASE_USER · PASSWORD/);
       assert.match(html, /do not currently invoke canAccess\(\)/);
       assert.match(html, /flow-description/);
       assert.match(html, /architecture-description/);

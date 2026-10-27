@@ -18,5 +18,14 @@
       "healthCheck": "http://secretario.railway.internal:8200/v1/sys/health",
       "type": "Secretario"
     }
+  },
+  "datastores": {
+    "users": { "type": "postgres" },
+    "groups": { "type": "postgres" },
+    "organizations": { "type": "postgres" },
+    "user-environments": { "type": "postgres" },
+    "acls": { "type": "postgres" },
+    "stores": { "type": "file" },
+    "virtual-machines": { "type": "file" }
   }
 }

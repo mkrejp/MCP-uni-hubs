@@ -11,5 +11,8 @@
     "web:dev": "node --watch src/web-server.js",
     "cli": "node src/index.js",
     "test": "node --test"
+  },
+  "dependencies": {
+    "pg": "^8.23.1"
   }
 }

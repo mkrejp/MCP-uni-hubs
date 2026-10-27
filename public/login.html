@@ -241,7 +241,7 @@
       <section class="application-overview" aria-labelledby="overview-heading">
         <p class="eyebrow">ABOUT THE PLATFORM</p>
         <h2 id="overview-heading">A modular control plane for MCP services</h2>
-        <p class="overview-copy">MCP Uni Hubs is a control plane for organizing users, hubs, and service integrations. It loads application configuration, local identity records, and plugins into a shared runtime. Google sign-in verifies a user's email against a local user record before issuing a signed session. Authenticated users can review application, plugin, secret-store, and hub information in the dashboard. The platform also provides secret resolution and VM orchestration, with provider capabilities determined by the configured integrations.</p>
+        <p class="overview-copy">MCP Uni Hubs is a control plane for organizing users, hubs, and service integrations. It loads application configuration and plugins into a shared runtime, routing each data area to local JSON files or configured PostgreSQL tables. Google sign-in verifies a user's email against a local user record before issuing a signed session. Authenticated users can review application, plugin, secret-store, and hub information in the dashboard. The platform also provides secret resolution and VM orchestration, with provider capabilities determined by the configured integrations.</p>
         <ul class="overview-links" aria-label="Jump to an architecture diagram">
           <li><a href="#plugin-heading">Plugin architecture</a></li>
           <li><a href="#flow-heading">Application flows</a></li>
@@ -368,7 +368,7 @@
           <div class="diagram-scroll">
             <svg class="diagram-canvas" viewBox="0 0 820 370" role="img" aria-labelledby="architecture-title architecture-description">
               <title id="architecture-title">MCP Uni Hubs solution architecture</title>
-              <desc id="architecture-description">The browser connects to the Node.js web server. The server uses Google for OAuth and calls the application runtime, which loads plugins and uses the local JSON datastore as its current record source. A separate UniversalConnectionManager has a file or SQL interface, but its SQL rows are in-memory fixtures, it is not wired into the runtime, and no external SQL database is connected.</desc>
+              <desc id="architecture-description">The browser connects to the Node.js web server. The server uses Google for OAuth and calls the application runtime, which loads plugins and accesses records through ConfiguredDataStore. Each data area routes to local JSON files by default or to a PostgreSQL table when configured. PostgreSQL tables store a text ID and a JSONB record payload.</desc>
               <defs>
                 <marker id="architecture-arrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
                   <path d="M0 0 L7 3.5 L0 7 Z" fill="#7f9c88"></path>
@@ -404,27 +404,27 @@
               <text class="node-detail" x="682" y="228">src/app-runtime.js</text>
               <path class="connector" d="M512 159 C533 173 540 190 561 198" marker-end="url(#architecture-arrow)"></path>
 
-              <text class="diagram-label" x="20" y="270">DATA SOURCES / CURRENT RUNTIME AND SEPARATE PROTOTYPE</text>
+              <text class="diagram-label" x="20" y="270">AREA-ROUTED RECORD STORAGE</text>
               <rect class="diagram-node-accent" x="20" y="283" width="242" height="67" rx="8"></rect>
               <text class="node-title" x="141" y="306">Local JSON datastore</text>
               <text class="node-detail" x="141" y="325">LocalDataStore · data/*.json</text>
-              <text class="node-detail" x="141" y="341">current runtime records</text>
-              <path class="connector" d="M262 316 C390 316 452 253 561 226" marker-end="url(#architecture-arrow)"></path>
+              <text class="node-detail" x="141" y="341">default for unconfigured areas</text>
 
               <rect class="diagram-node" x="300" y="283" width="230" height="67" rx="8"></rect>
-              <text class="node-title" x="415" y="306">UniversalConnectionManager</text>
-              <text class="node-detail" x="415" y="325">file or SQL interface</text>
-              <text class="node-detail" x="415" y="341">separate from app runtime</text>
+              <text class="node-title" x="415" y="306">ConfiguredDataStore</text>
+              <text class="node-detail" x="415" y="325">routes each area by config</text>
+              <text class="node-detail" x="415" y="341">shared datastore API</text>
 
-              <path class="connector" stroke-dasharray="5 4" d="M532 316 H568" marker-end="url(#architecture-arrow)"></path>
+              <path class="connector" d="M298 316 H267" marker-end="url(#architecture-arrow)"></path>
+              <path class="connector" d="M532 316 H568" marker-end="url(#architecture-arrow)"></path>
               <rect class="diagram-node-external" x="574" y="283" width="224" height="67" rx="8"></rect>
-              <text class="node-title" x="686" y="306">SQL data source</text>
-              <text class="node-detail" x="686" y="325">in-memory prototype only</text>
-              <text class="node-detail" x="686" y="341">no external DB connection</text>
-              <text class="node-detail" x="550" y="304">not wired</text>
+              <text class="node-title" x="686" y="306">PostgreSQL tables</text>
+              <text class="node-detail" x="686" y="325">id TEXT · data JSONB</text>
+              <text class="node-detail" x="686" y="341">for configured areas</text>
+              <path class="connector" d="M682 244 V268 H530 V278" marker-end="url(#architecture-arrow)"></path>
             </svg>
           </div>
-          <p class="architecture-footer">The runtime currently uses local JSON records. SQL is a separate in-memory prototype and is not connected to an external database or the application runtime.</p>
+          <p class="architecture-footer">Each record area can independently use local JSON or a PostgreSQL table; PostgreSQL connection strings are provided through runtime configuration.</p>
         </section>
 
         <section class="diagram-card" aria-labelledby="acl-heading">
@@ -483,7 +483,7 @@
           <div class="diagram-scroll">
             <svg class="diagram-canvas" viewBox="0 0 820 326" role="img" aria-labelledby="network-title network-description">
               <title id="network-title">Public and private network connectivity</title>
-              <desc id="network-description">Public browser traffic reaches the application through Railway's HTTPS edge on port 443 and is forwarded to the service on its Railway-provided port. The app has a configured internal connection to Secretario at secretario.railway.internal on port 8200, although reachability is not implied. When those integrations are used and configured, the app can make outbound HTTPS requests to Google identity endpoints and the Railway GraphQL API. Current application records use local JSON files on the app service filesystem; the separate SQL connection manager is only an in-memory prototype and has no external database connection.</desc>
+              <desc id="network-description">Public browser traffic reaches the application through Railway's HTTPS edge on port 443 and is forwarded to the service on its Railway-provided port. The app has a configured internal connection to Secretario at secretario.railway.internal on port 8200, although reachability is not implied. Datastore areas use local JSON files by default and can use PostgreSQL tables when configured with a database connection string. When configured and used, the app can also make outbound HTTPS requests to Google identity endpoints and the Railway GraphQL API. The repository does not define separate subnet or firewall configuration.</desc>
               <defs>
                 <marker id="network-arrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
                   <path d="M0 0 L7 3.5 L0 7 Z" fill="#6c94a7"></path>
@@ -511,10 +511,10 @@
               <text class="node-title" x="397" y="96">MCP Uni Hubs app</text>
               <text class="node-detail" x="397" y="116">web server · OAuth · plugins</text>
               <text class="node-detail" x="397" y="133">HOST 0.0.0.0 · Railway $PORT</text>
-              <text class="node-detail" x="397" y="151">dashboard + API routes</text>
+              <text class="node-detail" x="397" y="151">dashboard · API · data routing</text>
 
               <rect class="network-private-node" x="278" y="183" width="238" height="29" rx="6"></rect>
-              <text class="node-detail" x="397" y="202">Local JSON data · app filesystem</text>
+              <text class="node-detail" x="397" y="202">File areas · app filesystem</text>
               <path class="connector" d="M397 172 V179" marker-end="url(#network-arrow-private)"></path>
 
               <rect class="network-private-node" x="553" y="91" width="238" height="78" rx="8"></rect>
@@ -523,7 +523,13 @@
               <text class="node-detail" x="672" y="153">configured internal endpoint</text>
               <path class="connector" d="M518 121 H547" marker-end="url(#network-arrow-private)"></path>
 
-              <text class="network-public-label" x="263" y="248">OUTBOUND HTTPS / PUBLIC APIS</text>
+              <text class="network-public-label" x="263" y="248">OPTIONAL CONNECTIVITY / CONFIGURED INTEGRATIONS</text>
+              <rect class="network-external-node" x="10" y="254" width="238" height="64" rx="8"></rect>
+              <text class="node-title" x="129" y="274">PostgreSQL datastore</text>
+              <text class="node-detail" x="129" y="291">DATABASE_HOST · PORT · DBNAME</text>
+              <text class="node-detail" x="129" y="307">DATABASE_USER · PASSWORD</text>
+              <path class="connector" d="M278 197 C220 213 172 232 129 250" marker-end="url(#network-arrow)"></path>
+
               <rect class="network-external-node" x="278" y="260" width="238" height="48" rx="8"></rect>
               <text class="node-title" x="397" y="280">Google identity endpoints</text>
               <text class="node-detail" x="397" y="297">OAuth token + userinfo</text>
@@ -535,7 +541,7 @@
               <path class="connector" d="M470 172 C508 208 581 227 637 256" marker-end="url(#network-arrow)"></path>
             </svg>
           </div>
-          <p class="architecture-footer">The internal Secretario URL is configured, not a reachability guarantee. Application records currently use local JSON files; SQL is an in-memory prototype, not a live network connection. The repository does not define separate subnet or firewall rules.</p>
+          <p class="architecture-footer">The internal Secretario URL is configured, not a reachability guarantee. PostgreSQL connectivity is enabled only for areas configured with a runtime connection string. The repository does not define separate subnet or firewall rules.</p>
         </section>
       </div>
     </main>
