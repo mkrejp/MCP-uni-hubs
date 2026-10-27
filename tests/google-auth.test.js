@@ -113,10 +113,25 @@ test('unauthenticated / serves dedicated login page', async () => {
       const overview = html.match(/class="overview-copy">([^<]+)<\/p>/)?.[1];
       assert.ok(overview);
       assert.equal((overview.match(/[.!?](?:\s|$)/g) || []).length, 5);
+      assert.match(html, /aria-label="Jump to an architecture diagram"/);
+      for (const diagramId of ['plugin-heading', 'flow-heading', 'architecture-heading', 'acl-heading', 'network-heading']) {
+        assert.match(html, new RegExp(`href="#${diagramId}"`));
+        assert.match(html, new RegExp(`id="${diagramId}"`));
+      }
+      assert.match(html, /Plugin architecture/);
       assert.match(html, /Application flows/);
       assert.match(html, /Solution architecture/);
+      assert.match(html, /ACL security architecture/);
+      assert.match(html, /Network and connectivity/);
+      assert.match(html, /do not currently invoke canAccess\(\)/);
       assert.match(html, /flow-description/);
       assert.match(html, /architecture-description/);
+      assert.match(html, /plugin-description/);
+      assert.match(html, /acl-description/);
+      assert.match(html, /network-description/);
+      assert.ok(html.indexOf('Plugin architecture') < html.indexOf('Application flows'));
+      assert.ok(html.indexOf('ACL security architecture') > html.indexOf('Solution architecture'));
+      assert.ok(html.indexOf('Network and connectivity') > html.indexOf('ACL security architecture'));
       assert.equal(html.includes('Application overview'), false);
       assert.equal(html.includes('/app.js'), false);
 
