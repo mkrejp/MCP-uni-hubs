@@ -9,6 +9,7 @@ import { AccessControlPlugin } from '../src/access-control.js';
 import { SecretsManagerPlugin } from '../src/secrets-manager.js';
 import { ConfigLoader, bootstrapEnvironmentData } from '../src/config-loader.js';
 import { createDashboardServer } from '../src/web-server.js';
+import { COOKIE_NAMES, createSessionToken } from '../src/google-auth.js';
 
 test('registry registers and resolves hubs', () => {
   const registry = new HubRegistry();
@@ -349,52 +350,71 @@ test('config loader resolves store tokens from env and does not persist credenti
 });
 
 test('web dashboard serves runtime data without exposing store credentials', async () => {
-  const datastore = new LocalDataStore('./tmp/dashboard');
-  await datastore.write('users', 'monitorer', {
-    id: 'monitorer',
-    username: 'monitorer',
-    email: 'monitorer@example.com',
-    organizationId: 'org-platform',
-    groupIds: ['platform-readers'],
-    roles: ['reader'],
-    password: 'must-not-be-returned',
-  });
-
-  const runtime = {
-    rootDir: '/app',
-    configPath: '/app/config/app.env.json',
-    startupConfig: {
-      stores: {
-        secretario: {
-          name: 'secretario',
-          type: 'Secretario',
-          address: 'http://vault.internal:8200',
-          token: 'must-not-be-returned',
-        },
-      },
-    },
-    datastore,
-    logger: { level: 'INFO', instanceId: 'test-instance' },
-    plugins: [{ name: 'secrets-manager' }],
-    summary: { status: { healthy: 2, total: 3 } },
-  };
-  const server = createDashboardServer(runtime);
-  await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
+  const previousSecret = process.env.SESSION_SECRET;
+  process.env.SESSION_SECRET = 'dashboard-test-session-secret';
 
   try {
-    const baseUrl = `http://127.0.0.1:${server.address().port}`;
-    const pageResponse = await fetch(baseUrl);
-    const apiResponse = await fetch(`${baseUrl}/api/dashboard`);
-    const dashboard = await apiResponse.json();
-    const serialized = JSON.stringify(dashboard);
+    const datastore = new LocalDataStore('./tmp/dashboard');
+    await datastore.write('users', 'monitorer', {
+      id: 'monitorer',
+      username: 'monitorer',
+      email: 'monitorer@example.com',
+      organizationId: 'org-platform',
+      groupIds: ['platform-readers'],
+      roles: ['reader'],
+      password: 'must-not-be-returned',
+    });
 
-    assert.equal(pageResponse.status, 200);
-    assert.equal(apiResponse.status, 200);
-    assert.equal(dashboard.plugins[0].name, 'secrets-manager');
-    assert.equal(dashboard.stores[0].id, 'secretario');
-    assert.equal(dashboard.users[0].username, 'monitorer');
-    assert.equal(serialized.includes('must-not-be-returned'), false);
+    const runtime = {
+      rootDir: '/app',
+      configPath: '/app/config/app.env.json',
+      startupConfig: {
+        stores: {
+          secretario: {
+            name: 'secretario',
+            type: 'Secretario',
+            address: 'http://vault.internal:8200',
+            token: 'must-not-be-returned',
+          },
+        },
+      },
+      datastore,
+      logger: { level: 'INFO', instanceId: 'test-instance' },
+      plugins: [{ name: 'secrets-manager' }],
+      summary: { status: { healthy: 2, total: 3 } },
+    };
+    const server = createDashboardServer(runtime);
+    await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
+
+    try {
+      const baseUrl = `http://127.0.0.1:${server.address().port}`;
+      const sessionToken = createSessionToken({
+        userId: 'monitorer',
+        email: 'monitorer@example.com',
+      }, process.env.SESSION_SECRET);
+      const pageResponse = await fetch(baseUrl);
+      const unauthorized = await fetch(`${baseUrl}/api/dashboard`);
+      const apiResponse = await fetch(`${baseUrl}/api/dashboard`, {
+        headers: { Cookie: `${COOKIE_NAMES.SESSION_COOKIE}=${sessionToken}` },
+      });
+      const dashboard = await apiResponse.json();
+      const serialized = JSON.stringify(dashboard);
+
+      assert.equal(pageResponse.status, 200);
+      assert.equal(unauthorized.status, 401);
+      assert.equal(apiResponse.status, 200);
+      assert.equal(dashboard.plugins[0].name, 'secrets-manager');
+      assert.equal(dashboard.stores[0].id, 'secretario');
+      assert.equal(dashboard.users[0].username, 'monitorer');
+      assert.equal(serialized.includes('must-not-be-returned'), false);
+    } finally {
+      await new Promise((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
+    }
   } finally {
-    await new Promise((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
+    if (previousSecret === undefined) {
+      delete process.env.SESSION_SECRET;
+    } else {
+      process.env.SESSION_SECRET = previousSecret;
+    }
   }
 });

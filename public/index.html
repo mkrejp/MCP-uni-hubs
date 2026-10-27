@@ -9,7 +9,22 @@
     <script src="/app.js" defer></script>
   </head>
   <body>
-    <div class="app-shell">
+    <div id="login-gate" class="login-gate" hidden>
+      <div class="login-panel">
+        <div class="login-brand">
+          <span class="brand-mark" aria-hidden="true">M</span>
+          <div>
+            <strong>MCP Uni Hubs</strong>
+            <small>CONTROL PLANE</small>
+          </div>
+        </div>
+        <h1>Sign in to continue</h1>
+        <p>Use a Google account whose verified email matches a datastore user.</p>
+        <a id="google-signin" class="google-signin" href="/auth/google">Sign in with Google</a>
+      </div>
+    </div>
+
+    <div id="dashboard-shell" class="app-shell" hidden>
       <aside class="sidebar" aria-label="Application navigation">
         <a class="brand" href="/" aria-label="MCP Uni Hubs overview">
           <span class="brand-mark" aria-hidden="true">M</span>
@@ -32,6 +47,10 @@
         <header class="topbar">
           <div class="breadcrumb">APPLICATION <span>/</span> OVERVIEW</div>
           <div class="topbar-actions">
+            <div id="session-user" class="session-user" hidden>
+              <span id="session-label" class="session-label"></span>
+              <a class="signout-link" href="/auth/logout">Sign out</a>
+            </div>
             <span class="live-state"><span class="status-pip"></span>LIVE</span>
             <button id="refresh-button" class="refresh-button" type="button" title="Refresh dashboard data">
               <span aria-hidden="true">↻</span><span>Refresh</span>
@@ -115,3 +134,4 @@
     </div>
   </body>
 </html>
+

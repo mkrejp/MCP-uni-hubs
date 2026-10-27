@@ -2,6 +2,13 @@ import { createServer } from 'node:http';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { buildDashboardData, createApplicationRuntime } from './app-runtime.js';
+import {
+  handleGoogleCallback,
+  handleMe,
+  logout,
+  requireAuth,
+  startGoogleLogin,
+} from './google-auth.js';
 
 const PUBLIC_DIR = fileURLToPath(new URL('../public/', import.meta.url));
 const STATIC_FILES = {
@@ -10,6 +17,11 @@ const STATIC_FILES = {
   '/styles.css': ['styles.css', 'text/css; charset=utf-8'],
 };
 
+/**
+ * Create the HTTP dashboard server with Google OAuth protection for APIs.
+ * @param {{datastore: object}} runtime
+ * @returns {import('node:http').Server}
+ */
 export function createDashboardServer(runtime) {
   return createServer(async (request, response) => {
     const pathname = new URL(request.url, 'http://localhost').pathname;
@@ -17,13 +29,38 @@ export function createDashboardServer(runtime) {
     response.setHeader('Referrer-Policy', 'no-referrer');
     response.setHeader('Cache-Control', 'no-store');
 
-    if (request.method !== 'GET') {
-      response.writeHead(405, { Allow: 'GET' });
-      response.end('Method not allowed');
+    const method = request.method || 'GET';
+    const isGet = method === 'GET';
+    const isPost = method === 'POST';
+
+    if (pathname === '/auth/google' && isGet) {
+      startGoogleLogin(request, response);
       return;
     }
 
-    if (pathname === '/api/dashboard') {
+    if (pathname === '/auth/google/callback' && isGet) {
+      await handleGoogleCallback(request, response, { datastore: runtime.datastore });
+      return;
+    }
+
+    if (pathname === '/auth/logout' && (isGet || isPost)) {
+      logout(request, response);
+      return;
+    }
+
+    if (pathname === '/api/me' && isGet) {
+      await handleMe(request, response, { datastore: runtime.datastore });
+      return;
+    }
+
+    if (pathname === '/api/dashboard' && isGet) {
+      const session = requireAuth(request);
+      if (!session) {
+        response.writeHead(401, { 'Content-Type': 'application/json; charset=utf-8' });
+        response.end(JSON.stringify({ error: 'Unauthorized' }));
+        return;
+      }
+
       try {
         const dashboard = await buildDashboardData(runtime);
         response.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
@@ -32,6 +69,12 @@ export function createDashboardServer(runtime) {
         response.writeHead(500, { 'Content-Type': 'application/json; charset=utf-8' });
         response.end(JSON.stringify({ error: 'Unable to load dashboard data' }));
       }
+      return;
+    }
+
+    if (!isGet) {
+      response.writeHead(405, { Allow: 'GET, POST' });
+      response.end('Method not allowed');
       return;
     }
 

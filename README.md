@@ -10,9 +10,28 @@ npm start
 npm run web
 ```
 
-`npm run web` serves the dashboard on port 3000 by default. It reports configured secret stores, not live connectivity. The dashboard currently has no authentication and should not be exposed as an administrative surface.
+`npm run web` serves the dashboard on port 3000 by default. It reports configured secret stores, not live connectivity. Dashboard APIs require a signed-in Google session.
 
 The Secretario token must be supplied as the runtime environment variable `SECRETARIO_TOKEN`; do not commit its value.
+
+## Google authentication (Railway)
+
+Set these runtime variables on the Railway service `mcp-uni-hubs`:
+
+| Variable | Purpose |
+| --- | --- |
+| `GOOGLE_CLIENT_ID` | Google OAuth client ID |
+| `GOOGLE_CLIENT_SECRET` | Google OAuth client secret |
+| `SESSION_SECRET` | HMAC key for the signed session cookie |
+| `PUBLIC_BASE_URL` | Canonical public origin (no trailing slash), e.g. `https://….up.railway.app` |
+
+Register this redirect URI in Google Cloud Console:
+
+```text
+{PUBLIC_BASE_URL}/auth/google/callback
+```
+
+Only Google accounts with a **verified** email that matches an existing datastore user (`data/users/*.json`, case-insensitive) can sign in. Unmatched emails are denied; users are never auto-created from Google. When `GOOGLE_CLIENT_ID` is unset, `GET /auth/google` returns HTTP 503.
 
 ## Documentation
 
