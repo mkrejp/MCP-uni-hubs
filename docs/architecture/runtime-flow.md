@@ -40,4 +40,4 @@ Both application entry points use `createApplicationRuntime()` from `src/app-run
 5. Secretario sends HTTP GET to the configured Vault KV v2 data URL with `X-Vault-Token`; the requested key is read from `payload.data.data` (with a fallback for other response shapes).
 6. The resolved environment is a map from secret key to value. Never log or serialize that map into the dashboard or normal operational output.
 
-The provider functions other than Secretario are placeholders, not remote connectors.
+Secret-store providers other than Secretario are placeholders. Among VM providers, only Railway performs remote GraphQL calls (when `RAILWAY_TOKEN` / `RAILWAY_API_TOKEN` is set); the rest remain local simulations.

@@ -36,8 +36,9 @@ This reference maps the principal modules to their public operations. For call o
 ## VM Orchestrator — `plugins/vm-orchestrator.js`
 
 - `listVirtualMachines()` reads all `virtual-machines` records; `getVmDefinition(idOrName)` returns one or throws.
-- `createVm`, `startVm`, `stopVm`, and `deleteVm` call `performAction()`, normalize a provider, build a request, call a local protocol handler, and persist the resulting state.
-- Current provider handlers construct simulated results; no cloud SDK or remote API call is made. Do not describe these operations as provisioning real VMs.
+- `createVm`, `startVm`, `stopVm`, and `deleteVm` call `performAction()`, normalize a provider, build a request, call a protocol handler, and persist the resulting state.
+- Most providers (AWS, GCP, Azure, VMware, IBM, OpenStack) construct simulated results locally; they do not call cloud APIs.
+- The `RAILWAY` provider (`src/vm-providers/railway.js`) calls the Railway public GraphQL API with native `fetch`. Auth uses `RAILWAY_TOKEN` (or alias `RAILWAY_API_TOKEN`) from the container runtime only — never from committed JSON. See [Railway runtime guide](../platforms/railway.md).
 
 ## Logger — `src/logger.js`
 

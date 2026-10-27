@@ -1,0 +1,6 @@
+{
+  "id": "railway-operators",
+  "name": "Railway Operators",
+  "organizationId": "org-platform",
+  "description": "Operators for Railway VM orchestration samples."
+}

@@ -1,0 +1,10 @@
+{
+  "id": "userrail-vm-orchestrator",
+  "subjectType": "user",
+  "subjectId": "userrail",
+  "resourceType": "plugin",
+  "resourceId": "vm-orchestrator",
+  "action": "*",
+  "effect": "allow",
+  "organizationId": "org-platform"
+}

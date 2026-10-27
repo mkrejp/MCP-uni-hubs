@@ -37,6 +37,23 @@ Register this redirect URI in Google Cloud Console:
 
 Only Google accounts with a **verified** email that matches an existing datastore user (`data/users/*.json`, case-insensitive) can sign in. Unmatched emails are denied; users are never auto-created from Google. When `GOOGLE_CLIENT_ID` is unset, `GET /auth/google` returns HTTP 503.
 
+### Railway VM orchestration (mcp-uni-hubs service)
+
+Sample user `userrail` and VM definition `MCP_001` target Railway project **skillful-sparkle**. Connection secrets and IDs come from container runtime variables only (never committed JSON):
+
+| Variable | Required | Purpose |
+| --- | --- | --- |
+| `RAILWAY_TOKEN` | Yes* | Railway GraphQL API token (preferred). |
+| `RAILWAY_API_TOKEN` | Yes* | Alias used when `RAILWAY_TOKEN` is unset. |
+| `RAILWAY_PROJECT_ID` | For `MCP_001` | Project id (`f9236355-ad59-41ce-a087-a359d15c0025` for skillful-sparkle). |
+| `RAILWAY_ENVIRONMENT_ID` | For `MCP_001` | Environment id (`efca1cc9-6d2a-4013-b160-7c21e06623c8` for production). |
+| `RAILWAY_API_ENDPOINT` | No | Defaults to `https://backboard.railway.com/graphql/v2`. |
+| `RAILWAY_MCP_001_IMAGE` | Usually | Docker image for create; alternatively `RAILWAY_MCP_001_REPO`. |
+
+\* One of `RAILWAY_TOKEN` or `RAILWAY_API_TOKEN` is required for live Railway create/start/stop/delete.
+
+See [docs/platforms/railway.md](docs/platforms/railway.md) for the full variable list.
+
 ## Documentation
 
 - [Agent and tool routing](AGENTS.md)

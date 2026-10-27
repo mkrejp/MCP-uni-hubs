@@ -1,7 +1,9 @@
 import { LocalDataStore } from '../src/local-data-store.js';
+import { railwayProtocol } from '../src/vm-providers/railway.js';
 
 const VM_DEFINITION_AREA = 'virtual-machines';
 const SUPPORTED_PROTOCOLS = {
+  RAILWAY: railwayProtocol,
   AWS: {
     create: (definition, request) => ({
       provider: 'AWS',
@@ -306,14 +308,28 @@ export default function registerVmOrchestrator(appContext = {}) {
     }
 
     const request = buildRequest(definition, action, overrides);
-    const remoteResponse = handler[action](definition, request);
+    const remoteResponse = await handler[action](definition, request);
 
     if (logger && typeof logger.info === 'function') {
       logger.info(`VM ${action} dispatched`, { vmId, provider: providerName, action });
     }
 
     const state = action === 'create' ? 'created' : action === 'start' ? 'running' : action === 'stop' ? 'stopped' : 'deleted';
-    const persistedDefinition = { ...definition, state, lastAction: action, remoteResponse };
+    const connectionUpdates = {};
+    if (providerName === 'RAILWAY' && remoteResponse?.serviceId) {
+      connectionUpdates.connection = {
+        ...(definition.connection || {}),
+        serviceId: remoteResponse.serviceId,
+      };
+    }
+
+    const persistedDefinition = {
+      ...definition,
+      ...connectionUpdates,
+      state,
+      lastAction: action,
+      remoteResponse,
+    };
 
     if (action !== 'delete') {
       await datastore.write(VM_DEFINITION_AREA, definition.id, persistedDefinition);

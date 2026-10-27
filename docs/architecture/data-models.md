@@ -119,7 +119,26 @@ Area is `virtual-machines`; each record has an `id`, display `name`, provider/pr
 }
 ```
 
-Do not use real credentials in VM fixtures. VM action results update `state`, `lastAction`, and `remoteResponse`; delete writes an empty `{}` record through `LocalDataStore.delete()`.
+Railway sample (`MCP_001`) uses `${ENV}` placeholders for connection fields. The API token is never stored in the definition; the provider reads `RAILWAY_TOKEN` / `RAILWAY_API_TOKEN` from `process.env` at action time.
+
+```json
+{
+  "id": "MCP_001",
+  "name": "MCP_001",
+  "provider": "RAILWAY",
+  "apiType": "railway.serviceCreate",
+  "connection": {
+    "endpoint": "${RAILWAY_API_ENDPOINT}",
+    "projectId": "${RAILWAY_PROJECT_ID}",
+    "environmentId": "${RAILWAY_ENVIRONMENT_ID}",
+    "projectName": "skillful-sparkle"
+  },
+  "spec": { "serviceName": "MCP_001", "image": "${RAILWAY_MCP_001_IMAGE}", "sourceType": "image" },
+  "state": "stopped"
+}
+```
+
+Do not use real credentials in VM fixtures. VM action results update `state`, `lastAction`, and `remoteResponse`; Railway create also stores `connection.serviceId` for later start/stop/delete. Delete writes an empty `{}` record through `LocalDataStore.delete()`.
 
 ## Other In-memory Shapes
 
