@@ -366,9 +366,9 @@
             <h2 id="architecture-heading">Solution architecture</h2>
           </div>
           <div class="diagram-scroll">
-            <svg class="diagram-canvas" viewBox="0 0 820 270" role="img" aria-labelledby="architecture-title architecture-description">
+            <svg class="diagram-canvas" viewBox="0 0 820 370" role="img" aria-labelledby="architecture-title architecture-description">
               <title id="architecture-title">MCP Uni Hubs solution architecture</title>
-              <desc id="architecture-description">The browser connects to the Node.js web server. The server uses Google for OAuth and calls the application runtime, which bootstraps configuration, the local JSON datastore, plugins, and the in-memory hub registry.</desc>
+              <desc id="architecture-description">The browser connects to the Node.js web server. The server uses Google for OAuth and calls the application runtime, which loads plugins and uses the local JSON datastore as its current record source. A separate UniversalConnectionManager has a file or SQL interface, but its SQL rows are in-memory fixtures, it is not wired into the runtime, and no external SQL database is connected.</desc>
               <defs>
                 <marker id="architecture-arrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
                   <path d="M0 0 L7 3.5 L0 7 Z" fill="#7f9c88"></path>
@@ -404,14 +404,27 @@
               <text class="node-detail" x="682" y="228">src/app-runtime.js</text>
               <path class="connector" d="M512 159 C533 173 540 190 561 198" marker-end="url(#architecture-arrow)"></path>
 
-              <rect class="diagram-node" x="20" y="199" width="242" height="55" rx="8"></rect>
-              <text class="node-title" x="141" y="222">Local JSON datastore</text>
-              <text class="node-detail" x="141" y="240">data/ + config/</text>
-              <path class="connector" d="M262 226 H561" marker-end="url(#architecture-arrow)"></path>
-              <text class="node-detail" x="411" y="217">users · app configuration</text>
+              <text class="diagram-label" x="20" y="270">DATA SOURCES / CURRENT RUNTIME AND SEPARATE PROTOTYPE</text>
+              <rect class="diagram-node-accent" x="20" y="283" width="242" height="67" rx="8"></rect>
+              <text class="node-title" x="141" y="306">Local JSON datastore</text>
+              <text class="node-detail" x="141" y="325">LocalDataStore · data/*.json</text>
+              <text class="node-detail" x="141" y="341">current runtime records</text>
+              <path class="connector" d="M262 316 C390 316 452 253 561 226" marker-end="url(#architecture-arrow)"></path>
+
+              <rect class="diagram-node" x="300" y="283" width="230" height="67" rx="8"></rect>
+              <text class="node-title" x="415" y="306">UniversalConnectionManager</text>
+              <text class="node-detail" x="415" y="325">file or SQL interface</text>
+              <text class="node-detail" x="415" y="341">separate from app runtime</text>
+
+              <path class="connector" stroke-dasharray="5 4" d="M532 316 H568" marker-end="url(#architecture-arrow)"></path>
+              <rect class="diagram-node-external" x="574" y="283" width="224" height="67" rx="8"></rect>
+              <text class="node-title" x="686" y="306">SQL data source</text>
+              <text class="node-detail" x="686" y="325">in-memory prototype only</text>
+              <text class="node-detail" x="686" y="341">no external DB connection</text>
+              <text class="node-detail" x="550" y="304">not wired</text>
             </svg>
           </div>
-          <p class="architecture-footer">Plugins are loaded during bootstrap; Google handles identity, while application data stays in the local datastore.</p>
+          <p class="architecture-footer">The runtime currently uses local JSON records. SQL is a separate in-memory prototype and is not connected to an external database or the application runtime.</p>
         </section>
 
         <section class="diagram-card" aria-labelledby="acl-heading">
@@ -470,7 +483,7 @@
           <div class="diagram-scroll">
             <svg class="diagram-canvas" viewBox="0 0 820 326" role="img" aria-labelledby="network-title network-description">
               <title id="network-title">Public and private network connectivity</title>
-              <desc id="network-description">Public browser traffic reaches the application through Railway's HTTPS edge on port 443 and is forwarded to the service on its Railway-provided port. The app has a configured internal connection to Secretario at secretario.railway.internal on port 8200, although reachability is not implied. When those integrations are used and configured, the app can make outbound HTTPS requests to Google identity endpoints and the Railway GraphQL API. Local JSON data stays on the app service filesystem. This diagram does not claim separate subnet or firewall configuration.</desc>
+              <desc id="network-description">Public browser traffic reaches the application through Railway's HTTPS edge on port 443 and is forwarded to the service on its Railway-provided port. The app has a configured internal connection to Secretario at secretario.railway.internal on port 8200, although reachability is not implied. When those integrations are used and configured, the app can make outbound HTTPS requests to Google identity endpoints and the Railway GraphQL API. Current application records use local JSON files on the app service filesystem; the separate SQL connection manager is only an in-memory prototype and has no external database connection.</desc>
               <defs>
                 <marker id="network-arrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
                   <path d="M0 0 L7 3.5 L0 7 Z" fill="#6c94a7"></path>
@@ -522,7 +535,7 @@
               <path class="connector" d="M470 172 C508 208 581 227 637 256" marker-end="url(#network-arrow)"></path>
             </svg>
           </div>
-          <p class="architecture-footer">The internal Secretario URL is configured, not a reachability guarantee. The repository does not define separate subnet or firewall rules; private and public zones here describe the documented service paths.</p>
+          <p class="architecture-footer">The internal Secretario URL is configured, not a reachability guarantee. Application records currently use local JSON files; SQL is an in-memory prototype, not a live network connection. The repository does not define separate subnet or firewall rules.</p>
         </section>
       </div>
     </main>
