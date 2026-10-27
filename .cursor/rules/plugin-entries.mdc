@@ -1,0 +1,7 @@
+---
+description: "Conventions for auto-discovered plugin wrappers."
+globs: "plugins/*.js"
+alwaysApply: false
+---
+
+Plugin files are loaded dynamically from `plugins/`; use a small default factory or `register(appContext)` wrapper. Read `.github/skills/plugin-development/SKILL.md` and only the relevant section of `docs/architecture/components.md`. Plugin loading does not itself enforce ACLs.

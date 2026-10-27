@@ -7,7 +7,7 @@ description: "Configure a secrets provider, per-user secret references, or safe 
 
 Use this workflow for changes to `config/app.env.json`, `src/config-loader.js`, `src/secrets-manager.js`, or user environment records.
 
-1. Read `AGENTS.md`, `docs/architecture.md`, and the applicable `.github/instructions/configuration.instructions.md` rules.
+1. Read `AGENTS.md`, the applicable configuration instruction, and only [data models](../../../docs/architecture/data-models.md) plus [secret resolution flow](../../../docs/architecture/runtime-flow.md#secrets-resolution-flow).
 2. Put connection metadata in `stores.<store-id>` and credentials only in runtime environment variables, referenced as `${VARIABLE_NAME}`.
 3. Put per-user secret mappings in that user's `userEnvironments` record using `secretRefs` with `key`, `store`, and `path`.
 4. For the existing Secretario KV v2 backend, preserve the configured address, mount, data path, and `X-Vault-Token` behavior. Do not invent a health status; current status means configured only.

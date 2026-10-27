@@ -1,41 +1,32 @@
 # Agent Guide
 
-## Project
+MCP Uni Hubs is a dependency-light Node.js ES-module application. This file is the cross-tool entry point; load only the task-specific reference you need.
 
-MCP Uni Hubs is a dependency-light Node.js application using native ES modules. It provides hub registry behavior, plugins, JSON-backed application data, access control, secret resolution, and a small operational dashboard.
+Start at [docs/README.md](docs/README.md), select one reference for the current task, and avoid reading the entire docs tree unless the change crosses multiple component boundaries.
 
-## Start Here
+## Route By Task
 
-1. Read [docs/architecture.md](docs/architecture.md) for the application flow and known integration boundaries.
-2. Read [README.md](README.md) for commands and usage examples.
-3. Before editing configuration or security-sensitive code, read the matching rules in `.github/instructions/`.
-4. For plugin work, use [.github/skills/plugin-development/SKILL.md](.github/skills/plugin-development/SKILL.md). For secret-store work, use [.github/skills/configure-secret-store/SKILL.md](.github/skills/configure-secret-store/SKILL.md).
+| Task | Read next |
+| --- | --- |
+| Understand a request/startup path | [docs/architecture/runtime-flow.md](docs/architecture/runtime-flow.md) |
+| Change data, config, or datastore records | [docs/architecture/data-models.md](docs/architecture/data-models.md) |
+| Change ACL behavior or protected actions | [docs/architecture/authorization.md](docs/architecture/authorization.md) |
+| Change a core service/plugin boundary | [docs/architecture/components.md](docs/architecture/components.md) |
+| Configure or extend secrets | [.github/skills/configure-secret-store/SKILL.md](.github/skills/configure-secret-store/SKILL.md) |
+| Add/change a plugin | [.github/skills/plugin-development/SKILL.md](.github/skills/plugin-development/SKILL.md) |
+| Deploy or debug on Railway | [docs/platforms/railway.md](docs/platforms/railway.md) |
+| Find the right doc/tool instructions | [docs/README.md](docs/README.md) |
 
-## Useful Commands
+## Shared Rules
 
-```bash
-npm test
-npm start
-npm run web
-```
-
-`npm run web` serves the dashboard on port 3000 by default. `PORT` and `HOST` can override the listener.
-
-## Repository Map
-
-- `src/`: core services, startup runtime, configuration, and server code
-- `plugins/`: auto-discovered plugin entry points
-- `config/app.env.json`: shared app, store, identity, environment, and ACL configuration
-- `data/`: local JSON datastore records
-- `public/`: dashboard HTML, CSS, and browser JavaScript
-- `tests/`: Node.js built-in test runner suite
-- `docs/`: architecture and implementation notes
-
-## Working Rules
-
-- Follow existing JavaScript ES module and Node.js built-in API patterns; avoid adding dependencies without a concrete need.
-- Keep tests focused and run `npm test` after behavior changes.
-- Never commit tokens, passwords, private keys, or real cloud credentials. Secretario credentials come from the runtime `SECRETARIO_TOKEN` variable.
-- Treat `tmp/` and `logs/` as generated data. Do not include them in changes.
-- Do not describe a configured store as reachable: current dashboard status means configured, not health-checked.
+- Use `npm test` after behavior changes. The project uses Node.js built-ins and ES modules; avoid dependencies without a concrete need.
+- `SECRETARIO_TOKEN` is supplied at runtime. Never commit or persist usable credentials.
+- `tmp/` and `logs/` are generated. Do not include them in changes.
+- A configured secret store is not necessarily reachable. VM provider calls and SQL storage are prototypes; see the component reference.
 - Preserve existing user data and unrelated working-tree changes.
+
+## Tool Adapters
+
+- Cursor: load the matching `.cursor/rules/*.mdc` file; rules are intentionally scoped.
+- GitHub Copilot: use `.github/copilot-instructions.md`, matching `.github/instructions/*.instructions.md`, and task-specific skills.
+- Railway: use the Railway operations guide. No Railway deployment manifest is currently committed.

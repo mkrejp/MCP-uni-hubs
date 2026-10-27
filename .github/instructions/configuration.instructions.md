@@ -1,5 +1,5 @@
 ---
-applyTo: "config/**"
+applyTo: "config/**/*.json"
 ---
 
 # Configuration Rules
@@ -9,4 +9,5 @@ applyTo: "config/**"
 - Never put usable tokens, passwords, private keys, or cloud credentials in config files.
 - Keep user, group, organization, environment, and ACL records consistent with their datastore IDs and references.
 - Remember startup bootstrap writes configuration records to `data/`; credential-shaped store fields are removed before persistence.
+- For exact record shapes load only [data-models](../../docs/architecture/data-models.md); for permissions load [authorization](../../docs/architecture/authorization.md).
 - Add or update tests when changing placeholder expansion, store bootstrap, or config shape.

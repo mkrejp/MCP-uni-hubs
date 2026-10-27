@@ -1,0 +1,6 @@
+---
+description: "Always-on compact project router for MCP Uni Hubs."
+alwaysApply: true
+---
+
+Use `AGENTS.md` as the cross-tool entry point and `docs/README.md` to select one task-specific reference. Do not load every architecture document by default. Keep secrets in runtime variables, preserve user data, and run `npm test` after behavior changes.

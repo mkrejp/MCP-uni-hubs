@@ -1,0 +1,7 @@
+---
+description: "Node.js runtime, module, and component boundaries."
+globs: "src/**/*.js"
+alwaysApply: false
+---
+
+Follow the dependency-light Node.js ES module style. Before changing runtime flow, load `docs/architecture/runtime-flow.md`; before changing a service contract, load `docs/architecture/components.md`. Keep shared services injected through `appContext`. Run `npm test` after behavior changes.
