@@ -1,0 +1,7 @@
+---
+description: "Behavior-focused tests and fixture boundaries."
+globs: "tests/**/*.js"
+alwaysApply: false
+---
+
+Use `node:test` and `node:assert/strict`. Keep generated data under ignored `tmp/`, use synthetic credentials, restore global stubs in `finally`, and assert observable behavior. Load only the relevant reference from `docs/README.md`.

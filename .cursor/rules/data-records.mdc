@@ -1,0 +1,7 @@
+---
+description: "Local JSON datastore records and preservation rules."
+globs: "data/**/*.json"
+alwaysApply: false
+---
+
+Treat `data/` as user/application state. Preserve unrelated records, keep filename IDs and references consistent, and do not put credentials in records. Read only the relevant schema in `docs/architecture/data-models.md`; load `docs/architecture/authorization.md` only for ACL records.

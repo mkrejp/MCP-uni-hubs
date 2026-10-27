@@ -1,0 +1,7 @@
+---
+description: "Shared runtime config and placeholder handling."
+globs: "config/**/*.json"
+alwaysApply: false
+---
+
+Use `${ENV_NAME}` placeholders for runtime credentials. Read `docs/architecture/data-models.md` for config record schemas; preserve IDs and references. Never put actual secret values in tracked JSON.

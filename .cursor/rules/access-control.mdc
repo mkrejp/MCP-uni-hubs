@@ -1,0 +1,7 @@
+---
+description: "ACL decision behavior and enforcement boundary."
+globs: "src/access-control.js"
+alwaysApply: false
+---
+
+Before edits, read `docs/architecture/authorization.md`. ACL records are not enforcement: protected call sites must check `canAccess()` before reading sensitive data or performing side effects. Preserve default deny and test user/group/org and wildcard cases.
