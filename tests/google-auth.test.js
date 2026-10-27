@@ -109,6 +109,10 @@ test('unauthenticated / serves dedicated login page', async () => {
       assert.equal(response.status, 200);
       assert.match(html, /Sign in with Google/i);
       assert.match(html, /href="\/auth\/google"/);
+      assert.match(html, /Application flows/);
+      assert.match(html, /Solution architecture/);
+      assert.match(html, /flow-description/);
+      assert.match(html, /architecture-description/);
       assert.equal(html.includes('Application overview'), false);
       assert.equal(html.includes('/app.js'), false);
 

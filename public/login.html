@@ -15,6 +15,7 @@
         --lime: #c7ef69;
         --muted: #718078;
         --line: #dce4dd;
+        --paper: rgba(251, 252, 249, 0.96);
         --mono: 'DM Mono', 'SFMono-Regular', monospace;
       }
       * { box-sizing: border-box; }
@@ -24,20 +25,26 @@
         min-height: 100vh;
         display: grid;
         place-items: center;
-        padding: 24px;
+        padding: 32px;
         background:
           radial-gradient(circle at 12% 18%, #d7ebc480 0%, transparent 42%),
           radial-gradient(circle at 88% 78%, #c9ddd280 0%, transparent 40%),
           linear-gradient(160deg, #edf1ec 0%, #e4ebe4 100%);
       }
-      .login-panel {
-        width: min(420px, 100%);
-        padding: 34px 30px 30px;
+      .page-shell {
+        display: grid;
+        width: min(1240px, 100%);
+        grid-template-columns: minmax(270px, 340px) minmax(0, 1fr);
+        align-items: center;
+        gap: 26px;
+      }
+      .login-panel, .diagram-card {
         border: 1px solid var(--line);
         border-radius: 10px;
-        background: rgba(251, 252, 249, 0.96);
+        background: var(--paper);
         box-shadow: 0 18px 40px #14281c14;
       }
+      .login-panel { padding: 30px 27px; }
       .login-brand {
         display: flex;
         align-items: center;
@@ -69,7 +76,7 @@
         font-size: 24px;
         font-weight: 700;
       }
-      p {
+      .login-copy {
         margin: 0 0 24px;
         color: var(--muted);
         font-size: 13px;
@@ -89,20 +96,182 @@
         text-decoration: none;
       }
       .google-signin:hover { background: var(--forest-dark); }
+      .architecture-diagrams { display: grid; gap: 14px; min-width: 0; }
+      .diagram-card { min-width: 0; padding: 17px 19px 15px; }
+      .diagram-heading { margin-bottom: 8px; }
+      .eyebrow {
+        margin: 0 0 4px;
+        color: #6d8b7b;
+        font-family: var(--mono);
+        font-size: 9px;
+        letter-spacing: .08em;
+      }
+      h2 { margin: 0; font-size: 16px; }
+      .diagram-scroll { overflow-x: auto; }
+      .diagram-canvas { display: block; width: 100%; min-width: 720px; height: auto; }
+      .diagram-label { fill: #789087; font: 500 10px var(--mono); letter-spacing: .08em; }
+      .diagram-node { fill: #f8faf7; stroke: #cbd8ce; stroke-width: 1.2; }
+      .diagram-node-accent { fill: #e9f2df; stroke: #b7cba7; }
+      .diagram-node-external { fill: #f2f5ee; stroke: #d0d9ce; }
+      .diagram-node-dark { fill: #164b3c; stroke: #164b3c; }
+      .node-title { fill: #203b30; font: 700 12px 'Manrope', sans-serif; text-anchor: middle; }
+      .node-detail { fill: #708077; font: 10px 'DM Mono', monospace; text-anchor: middle; }
+      .node-title-light { fill: #f5faf5; }
+      .node-detail-light { fill: #c5d8ca; }
+      .connector { fill: none; stroke: #7f9c88; stroke-width: 1.6; }
+      .connector-auth { stroke: #54806a; }
+      .architecture-footer {
+        margin: 8px 0 0;
+        color: #7a8980;
+        font-size: 10px;
+        line-height: 1.45;
+      }
+      @media (max-width: 850px) {
+        body { place-items: start center; padding: 22px; }
+        .page-shell { max-width: 650px; grid-template-columns: 1fr; align-items: stretch; gap: 16px; }
+        .login-panel { padding: 26px; }
+      }
+      @media (max-width: 480px) {
+        body { padding: 12px; }
+        .login-panel { padding: 23px 20px; }
+        .diagram-card { padding: 15px 13px 13px; }
+        h2 { font-size: 15px; }
+      }
     </style>
   </head>
   <body>
-    <main class="login-panel">
-      <div class="login-brand">
-        <span class="brand-mark" aria-hidden="true">M</span>
-        <div>
-          <strong>MCP Uni Hubs</strong>
-          <small>CONTROL PLANE</small>
+    <main class="page-shell">
+      <section class="login-panel" aria-labelledby="login-title">
+        <div class="login-brand">
+          <span class="brand-mark" aria-hidden="true">M</span>
+          <div>
+            <strong>MCP Uni Hubs</strong>
+            <small>CONTROL PLANE</small>
+          </div>
         </div>
+        <h1 id="login-title">Sign in to continue</h1>
+        <p class="login-copy">Use a Google account whose verified email matches a datastore user.</p>
+        <a class="google-signin" href="/auth/google">Sign in with Google</a>
+      </section>
+
+      <div class="architecture-diagrams">
+        <section class="diagram-card" aria-labelledby="flow-heading">
+          <div class="diagram-heading">
+            <p class="eyebrow">REQUEST LIFECYCLE</p>
+            <h2 id="flow-heading">Application flows</h2>
+          </div>
+          <div class="diagram-scroll">
+            <svg class="diagram-canvas" viewBox="0 0 820 258" role="img" aria-labelledby="flow-title flow-description">
+              <title id="flow-title">Sign-in and authenticated dashboard flows</title>
+              <desc id="flow-description">Google sign-in returns to the server, which validates OAuth state, verifies the account email against the local user store, and issues a signed session cookie. The cookie authorizes dashboard pages and API requests.</desc>
+              <defs>
+                <marker id="flow-arrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+                  <path d="M0 0 L7 3.5 L0 7 Z" fill="#54806a"></path>
+                </marker>
+              </defs>
+              <text class="diagram-label" x="10" y="13">01 / GOOGLE SIGN-IN</text>
+              <rect class="diagram-node" x="10" y="27" width="148" height="76" rx="8"></rect>
+              <text class="node-title" x="84" y="57">Browser</text>
+              <text class="node-detail" x="84" y="76">/auth/google</text>
+
+              <path class="connector connector-auth" d="M160 65 H169" marker-end="url(#flow-arrow)"></path>
+              <rect class="diagram-node-external" x="173" y="27" width="148" height="76" rx="8"></rect>
+              <text class="node-title" x="247" y="57">Google</text>
+              <text class="node-detail" x="247" y="76">account consent</text>
+
+              <path class="connector connector-auth" d="M323 65 H332" marker-end="url(#flow-arrow)"></path>
+              <rect class="diagram-node" x="336" y="27" width="148" height="76" rx="8"></rect>
+              <text class="node-title" x="410" y="57">OAuth callback</text>
+              <text class="node-detail" x="410" y="76">state + code check</text>
+
+              <path class="connector connector-auth" d="M486 65 H495" marker-end="url(#flow-arrow)"></path>
+              <rect class="diagram-node-accent" x="499" y="27" width="148" height="76" rx="8"></rect>
+              <text class="node-title" x="573" y="57">Verify identity</text>
+              <text class="node-detail" x="573" y="76">email matches user</text>
+
+              <path class="connector connector-auth" d="M649 65 H658" marker-end="url(#flow-arrow)"></path>
+              <rect class="diagram-node-dark" x="662" y="27" width="148" height="76" rx="8"></rect>
+              <text class="node-title node-title-light" x="736" y="57">Signed session</text>
+              <text class="node-detail node-detail-light" x="736" y="76">cookie + redirect</text>
+
+              <text class="diagram-label" x="10" y="134">02 / AUTHENTICATED DASHBOARD</text>
+              <rect class="diagram-node" x="10" y="148" width="170" height="78" rx="8"></rect>
+              <text class="node-title" x="95" y="180">Browser</text>
+              <text class="node-detail" x="95" y="199">session cookie</text>
+
+              <path class="connector" d="M182 187 H215" marker-end="url(#flow-arrow)"></path>
+              <rect class="diagram-node" x="220" y="148" width="170" height="78" rx="8"></rect>
+              <text class="node-title" x="305" y="180">Auth guard</text>
+              <text class="node-detail" x="305" y="199">requireAuth()</text>
+
+              <path class="connector" d="M392 187 H425" marker-end="url(#flow-arrow)"></path>
+              <rect class="diagram-node" x="430" y="148" width="170" height="78" rx="8"></rect>
+              <text class="node-title" x="515" y="180">Protected routes</text>
+              <text class="node-detail" x="515" y="199">pages + /api/*</text>
+
+              <path class="connector" d="M602 187 H635" marker-end="url(#flow-arrow)"></path>
+              <rect class="diagram-node-accent" x="640" y="148" width="170" height="78" rx="8"></rect>
+              <text class="node-title" x="725" y="180">Dashboard</text>
+              <text class="node-detail" x="725" y="199">sanitized data</text>
+            </svg>
+          </div>
+          <p class="architecture-footer">Only verified Google emails matching a local user receive a signed session.</p>
+        </section>
+
+        <section class="diagram-card" aria-labelledby="architecture-heading">
+          <div class="diagram-heading">
+            <p class="eyebrow">SYSTEM OVERVIEW</p>
+            <h2 id="architecture-heading">Solution architecture</h2>
+          </div>
+          <div class="diagram-scroll">
+            <svg class="diagram-canvas" viewBox="0 0 820 270" role="img" aria-labelledby="architecture-title architecture-description">
+              <title id="architecture-title">MCP Uni Hubs solution architecture</title>
+              <desc id="architecture-description">The browser connects to the Node.js web server. The server uses Google for OAuth and calls the application runtime, which bootstraps configuration, the local JSON datastore, plugins, and the in-memory hub registry.</desc>
+              <defs>
+                <marker id="architecture-arrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+                  <path d="M0 0 L7 3.5 L0 7 Z" fill="#7f9c88"></path>
+                </marker>
+                <marker id="architecture-arrow-start" markerWidth="7" markerHeight="7" refX="1" refY="3.5" orient="auto">
+                  <path d="M7 0 L0 3.5 L7 7 Z" fill="#7f9c88"></path>
+                </marker>
+              </defs>
+              <text class="diagram-label" x="20" y="18">CLIENT</text>
+              <rect class="diagram-node" x="20" y="91" width="160" height="80" rx="8"></rect>
+              <text class="node-title" x="100" y="122">Browser</text>
+              <text class="node-detail" x="100" y="142">login + dashboard</text>
+
+              <text class="diagram-label" x="302" y="18">APPLICATION</text>
+              <rect class="diagram-node-dark" x="302" y="86" width="210" height="94" rx="8"></rect>
+              <text class="node-title node-title-light" x="407" y="119">Node.js web server</text>
+              <text class="node-detail node-detail-light" x="407" y="140">OAuth · session · routes</text>
+              <text class="node-detail node-detail-light" x="407" y="158">src/web-server.js</text>
+
+              <path class="connector" d="M184 131 H296" marker-end="url(#architecture-arrow)"></path>
+              <text class="node-detail" x="240" y="120">HTTPS</text>
+
+              <text class="diagram-label" x="613" y="18">IDENTITY PROVIDER</text>
+              <rect class="diagram-node-external" x="613" y="31" width="185" height="67" rx="8"></rect>
+              <text class="node-title" x="705" y="59">Google OAuth / OIDC</text>
+              <text class="node-detail" x="705" y="78">verified account email</text>
+              <path class="connector connector-auth" d="M512 103 C552 74 568 65 607 65" marker-start="url(#architecture-arrow-start)" marker-end="url(#architecture-arrow)"></path>
+
+              <text class="diagram-label" x="567" y="152">BOOTSTRAPPED AT STARTUP</text>
+              <rect class="diagram-node-accent" x="567" y="162" width="231" height="80" rx="8"></rect>
+              <text class="node-title" x="682" y="192">Application runtime</text>
+              <text class="node-detail" x="682" y="211">config · plugins · hub registry</text>
+              <text class="node-detail" x="682" y="228">src/app-runtime.js</text>
+              <path class="connector" d="M512 159 C533 173 540 190 561 198" marker-end="url(#architecture-arrow)"></path>
+
+              <rect class="diagram-node" x="20" y="199" width="242" height="55" rx="8"></rect>
+              <text class="node-title" x="141" y="222">Local JSON datastore</text>
+              <text class="node-detail" x="141" y="240">data/ + config/</text>
+              <path class="connector" d="M262 226 H561" marker-end="url(#architecture-arrow)"></path>
+              <text class="node-detail" x="411" y="217">users · app configuration</text>
+            </svg>
+          </div>
+          <p class="architecture-footer">Plugins are loaded during bootstrap; Google handles identity, while application data stays in the local datastore.</p>
+        </section>
       </div>
-      <h1>Sign in to continue</h1>
-      <p>Use a Google account whose verified email matches a datastore user.</p>
-      <a class="google-signin" href="/auth/google">Sign in with Google</a>
     </main>
   </body>
 </html>
