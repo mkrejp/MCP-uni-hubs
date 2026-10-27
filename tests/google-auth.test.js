@@ -97,6 +97,31 @@ async function withAuthEnv(run) {
   }
 }
 
+test('unauthenticated / serves dedicated login page', async () => {
+  await withAuthEnv(async () => {
+    const { runtime } = await createTestRuntime();
+    const server = createDashboardServer(runtime);
+    const baseUrl = await listen(server);
+
+    try {
+      const response = await fetch(baseUrl);
+      const html = await response.text();
+      assert.equal(response.status, 200);
+      assert.match(html, /Sign in with Google/i);
+      assert.match(html, /href="\/auth\/google"/);
+      assert.equal(html.includes('Application overview'), false);
+      assert.equal(html.includes('/app.js'), false);
+
+      const appJs = await fetch(`${baseUrl}/app.js`);
+      const styles = await fetch(`${baseUrl}/styles.css`);
+      assert.equal(appJs.status, 401);
+      assert.equal(styles.status, 401);
+    } finally {
+      await closeServer(server);
+    }
+  });
+});
+
 test('unauthenticated /api/dashboard returns 401', async () => {
   await withAuthEnv(async () => {
     const { runtime } = await createTestRuntime();
@@ -114,7 +139,7 @@ test('unauthenticated /api/dashboard returns 401', async () => {
   });
 });
 
-test('valid session cookie allows /api/dashboard 200', async () => {
+test('valid session cookie serves dashboard HTML and /api/dashboard 200', async () => {
   await withAuthEnv(async () => {
     const { runtime } = await createTestRuntime();
     const server = createDashboardServer(runtime);
@@ -123,10 +148,21 @@ test('valid session cookie allows /api/dashboard 200', async () => {
       userId: 'testmaster',
       email: 'testmaster@example.com',
     }, process.env.SESSION_SECRET);
+    const cookie = `${COOKIE_NAMES.SESSION_COOKIE}=${token}`;
 
     try {
+      const page = await fetch(baseUrl, { headers: { Cookie: cookie } });
+      const html = await page.text();
+      assert.equal(page.status, 200);
+      assert.match(html, /Application overview/);
+      assert.match(html, /\/app\.js/);
+      assert.equal(html.includes('Sign in with Google'), false);
+
+      const appJs = await fetch(`${baseUrl}/app.js`, { headers: { Cookie: cookie } });
+      assert.equal(appJs.status, 200);
+
       const response = await fetch(`${baseUrl}/api/dashboard`, {
-        headers: { Cookie: `${COOKIE_NAMES.SESSION_COOKIE}=${token}` },
+        headers: { Cookie: cookie },
       });
       assert.equal(response.status, 200);
       const dashboard = await response.json();

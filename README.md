@@ -10,7 +10,7 @@ npm start
 npm run web
 ```
 
-`npm run web` serves the dashboard on port 3000 by default. It reports configured secret stores, not live connectivity. Dashboard APIs require a signed-in Google session.
+`npm run web` serves the site on port 3000 by default. Unauthenticated visitors see only the Sign in with Google page; the control-plane dashboard HTML/JS/CSS and `/api/dashboard` require a signed session. It reports configured secret stores, not live connectivity.
 
 The Secretario token must be supplied as the runtime environment variable `SECRETARIO_TOKEN`; do not commit its value.
 
@@ -21,9 +21,9 @@ Set these runtime variables on the Railway service `mcp-uni-hubs`:
 | Variable | Purpose |
 | --- | --- |
 | `GOOGLE_CLIENT_ID` | Google OAuth client ID |
-| `GOOGLE_CLIENT_SECRET` | Google OAuth client secret |
+| `GOOGLE_CLIENT_SECRET` | Google OAuth client secret (name must be exactly this; not `GOOGLE_SECRET`) |
 | `SESSION_SECRET` | HMAC key for the signed session cookie |
-| `PUBLIC_BASE_URL` | Canonical public origin (no trailing slash), e.g. `https://….up.railway.app` |
+| `PUBLIC_BASE_URL` | Canonical public origin (no trailing slash), e.g. `https://mcp.animarium.ai` |
 
 Register this redirect URI in Google Cloud Console:
 

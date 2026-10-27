@@ -392,16 +392,24 @@ test('web dashboard serves runtime data without exposing store credentials', asy
         userId: 'monitorer',
         email: 'monitorer@example.com',
       }, process.env.SESSION_SECRET);
-      const pageResponse = await fetch(baseUrl);
+      const cookie = `${COOKIE_NAMES.SESSION_COOKIE}=${sessionToken}`;
+      const loginPage = await fetch(baseUrl);
+      const loginHtml = await loginPage.text();
       const unauthorized = await fetch(`${baseUrl}/api/dashboard`);
+      const dashboardPage = await fetch(baseUrl, { headers: { Cookie: cookie } });
+      const dashboardHtml = await dashboardPage.text();
       const apiResponse = await fetch(`${baseUrl}/api/dashboard`, {
-        headers: { Cookie: `${COOKIE_NAMES.SESSION_COOKIE}=${sessionToken}` },
+        headers: { Cookie: cookie },
       });
       const dashboard = await apiResponse.json();
       const serialized = JSON.stringify(dashboard);
 
-      assert.equal(pageResponse.status, 200);
+      assert.equal(loginPage.status, 200);
+      assert.match(loginHtml, /Sign in with Google/i);
+      assert.equal(loginHtml.includes('Application overview'), false);
       assert.equal(unauthorized.status, 401);
+      assert.equal(dashboardPage.status, 200);
+      assert.match(dashboardHtml, /Application overview/);
       assert.equal(apiResponse.status, 200);
       assert.equal(dashboard.plugins[0].name, 'secrets-manager');
       assert.equal(dashboard.stores[0].id, 'secretario');
