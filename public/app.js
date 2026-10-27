@@ -9,6 +9,8 @@ const usersTable = document.querySelector('#users-table');
 const searchInput = document.querySelector('#user-search');
 const emptyUsers = document.querySelector('#empty-users');
 const errorBanner = document.querySelector('#error-banner');
+const sessionUser = document.querySelector('#session-user');
+const sessionLabel = document.querySelector('#session-label');
 let allUsers = [];
 
 function makeElement(tag, className, text) {
@@ -16,6 +18,22 @@ function makeElement(tag, className, text) {
   if (className) element.className = className;
   if (text !== undefined) element.textContent = text;
   return element;
+}
+
+function redirectToLogin() {
+  window.location.replace('/');
+}
+
+function showSessionUser(user) {
+  if (!user) {
+    sessionUser.hidden = true;
+    return;
+  }
+  const label = user.username || user.email || user.id;
+  sessionLabel.textContent = user.email && user.username && user.email !== user.username
+    ? `${user.username} · ${user.email}`
+    : label;
+  sessionUser.hidden = false;
 }
 
 function renderConfig(application) {
@@ -109,7 +127,11 @@ async function loadDashboard() {
   refreshButton.disabled = true;
   errorBanner.hidden = true;
   try {
-    const response = await fetch('/api/dashboard', { cache: 'no-store' });
+    const response = await fetch('/api/dashboard', { cache: 'no-store', credentials: 'same-origin' });
+    if (response.status === 401) {
+      redirectToLogin();
+      return;
+    }
     if (!response.ok) throw new Error('Dashboard data request failed.');
     const data = await response.json();
 
@@ -132,6 +154,25 @@ async function loadDashboard() {
   }
 }
 
+async function bootstrap() {
+  try {
+    const response = await fetch('/api/me', { cache: 'no-store', credentials: 'same-origin' });
+    if (response.status === 401) {
+      redirectToLogin();
+      return;
+    }
+    if (!response.ok) {
+      throw new Error('Unable to verify session.');
+    }
+    const me = await response.json();
+    showSessionUser(me.user);
+    await loadDashboard();
+  } catch (error) {
+    errorBanner.textContent = `${error.message} Check the application server and try again.`;
+    errorBanner.hidden = false;
+  }
+}
+
 document.querySelector('#refresh-button').addEventListener('click', loadDashboard);
 searchInput.addEventListener('input', () => renderUsers(searchInput.value));
-loadDashboard();
+bootstrap();

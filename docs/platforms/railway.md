@@ -22,7 +22,10 @@ Public HTTPS for this project is at [https://mcp.animarium.ai](https://mcp.anima
 | Variable | Use | Notes |
 | --- | --- | --- |
 | `SECRETARIO_TOKEN` | Secretario Vault token | Required for successful authenticated secret fetches; referenced in `config/app.env.json`, never commit its value. |
-| `GOOGLE_CLIENT_SECRET` | Google OAuth client secret | Use this exact name when configuring Google OAuth; never commit its value. |
+| `GOOGLE_CLIENT_ID` | Google OAuth client ID | Required for Sign in with Google; unset → `/auth/google` returns 503. |
+| `GOOGLE_CLIENT_SECRET` | Google OAuth client secret | Exact name required (not `GOOGLE_SECRET`); never commit its value. |
+| `SESSION_SECRET` | Signed session cookie HMAC key | Required for dashboard sessions after Google login. |
+| `PUBLIC_BASE_URL` | Canonical public origin | No trailing slash; e.g. `https://mcp.animarium.ai`. Used for OAuth redirect URI. |
 | `PORT` | HTTP listener port | Supplied by Railway (often `8080`); do not hardcode a deployed port. App defaults to `3000` only when unset. |
 | `HOST` | HTTP bind address | Defaults to `0.0.0.0`, required for container reachability. |
 | `LOG_LEVEL` | Logger threshold | One of `DEBUG`, `INFO`, `WARN`, `ERROR`, `CRITICAL`; defaults to `INFO`. |
@@ -35,7 +38,7 @@ Set secrets in Railway service variables or a compatible runtime secret mechanis
 ## Persistence and Security Caveats
 
 - `LocalDataStore` writes to the repository-relative `data/` directory. Container filesystems may be ephemeral; if records must survive deployments, configure an appropriate Railway volume and verify its mount path against the deployed working directory.
-- The dashboard exposes users and configuration metadata and currently has no authentication middleware. Do not expose it publicly as an admin surface until access control/authentication is implemented at the HTTP boundary.
+- Dashboard HTML/JS/CSS and `/api/dashboard` require a signed Google session; unauthenticated visitors only see the login page. Only verified Google emails that match an existing datastore user can sign in.
 - `GET /api/dashboard` reports stores as configured; it does not perform remote health checks.
 - Only Secretario currently performs a real remote secret fetch. VM provider handlers and SQL connections are prototypes; do not describe them as live integrations.
 
@@ -43,7 +46,7 @@ Set secrets in Railway service variables or a compatible runtime secret mechanis
 
 1. Confirm the service start command is `npm start` (from `railway.toml` or the dashboard override).
 2. Confirm Railway's `PORT` is passed through and the process listens on `0.0.0.0`.
-3. Configure `SECRETARIO_TOKEN` (and `GOOGLE_CLIENT_SECRET` if Google OAuth is used) in Railway variables; never commit values.
+3. Configure `SECRETARIO_TOKEN`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `SESSION_SECRET`, and `PUBLIC_BASE_URL` in Railway variables; never commit values.
 4. Decide whether local `data/` must persist; configure and validate a volume if required.
-5. Keep the dashboard private until authenticated access is available.
+5. Confirm Google redirect URI is `{PUBLIC_BASE_URL}/auth/google/callback`.
 6. Use deployment logs to diagnose startup errors, but never print environment values or Vault response secrets.

@@ -10,12 +10,32 @@ npm start
 npm run cli
 ```
 
-`npm start` (same as `npm run web`) serves the dashboard. Locally it listens on port 3000 by default (`PORT` / `HOST` override). On Railway the container listens on `PORT` (commonly 8080); public HTTPS is [https://mcp.animarium.ai](https://mcp.animarium.ai) on the Railway edge (`:443`) — do not use `:8080` on the custom domain. The dashboard reports configured secret stores, not live connectivity, has no authentication, and should not be exposed as an administrative surface.
+`npm start` (same as `npm run web`) serves the site. Locally it listens on port 3000 by default (`PORT` / `HOST` override). On Railway the container listens on `PORT` (commonly 8080); public HTTPS is [https://mcp.animarium.ai](https://mcp.animarium.ai) on the Railway edge (`:443`) — do not use `:8080` on the custom domain. Unauthenticated visitors see only the Sign in with Google page; the control-plane dashboard HTML/JS/CSS and `/api/dashboard` require a signed session. It reports configured secret stores, not live connectivity.
 
 Runtime secrets (never commit values):
 
 - `SECRETARIO_TOKEN` — Secretario Vault token
-- `GOOGLE_CLIENT_SECRET` — Google OAuth client secret (this exact name)
+- `GOOGLE_CLIENT_SECRET` — Google OAuth client secret (this exact name; not `GOOGLE_SECRET`)
+- `SESSION_SECRET` — HMAC key for the signed session cookie
+
+## Google authentication (Railway)
+
+Set these runtime variables on the Railway service `mcp-uni-hubs`:
+
+| Variable | Purpose |
+| --- | --- |
+| `GOOGLE_CLIENT_ID` | Google OAuth client ID |
+| `GOOGLE_CLIENT_SECRET` | Google OAuth client secret (name must be exactly this; not `GOOGLE_SECRET`) |
+| `SESSION_SECRET` | HMAC key for the signed session cookie |
+| `PUBLIC_BASE_URL` | Canonical public origin (no trailing slash), e.g. `https://mcp.animarium.ai` |
+
+Register this redirect URI in Google Cloud Console:
+
+```text
+{PUBLIC_BASE_URL}/auth/google/callback
+```
+
+Only Google accounts with a **verified** email that matches an existing datastore user (`data/users/*.json`, case-insensitive) can sign in. Unmatched emails are denied; users are never auto-created from Google. When `GOOGLE_CLIENT_ID` is unset, `GET /auth/google` returns HTTP 503.
 
 ## Documentation
 
