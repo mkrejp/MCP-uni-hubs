@@ -15,7 +15,7 @@
         --lime: #c7ef69;
         --muted: #718078;
         --line: #dce4dd;
-        --paper: rgba(251, 252, 249, 0.96);
+        --paper: #fbfcf9;
         --mono: 'DM Mono', 'SFMono-Regular', monospace;
       }
       * { box-sizing: border-box; }
@@ -23,33 +23,37 @@
         margin: 0;
         min-width: 320px;
         min-height: 100vh;
-        display: grid;
-        place-items: center;
-        padding: 32px;
+        padding: 40px 24px 64px;
         background:
-          radial-gradient(circle at 12% 18%, #d7ebc480 0%, transparent 42%),
-          radial-gradient(circle at 88% 78%, #c9ddd280 0%, transparent 40%),
+          radial-gradient(ellipse at 12% 8%, #d7ebc480 0%, transparent 38%),
+          radial-gradient(ellipse at 92% 54%, #c9ddd280 0%, transparent 36%),
           linear-gradient(160deg, #edf1ec 0%, #e4ebe4 100%);
       }
       .page-shell {
         display: grid;
-        width: min(1240px, 100%);
-        grid-template-columns: minmax(270px, 340px) minmax(0, 1fr);
-        align-items: center;
-        gap: 26px;
+        width: min(1080px, 100%);
+        margin: 0 auto;
+        justify-items: center;
+        gap: 28px;
       }
       .login-panel, .diagram-card {
         border: 1px solid var(--line);
         border-radius: 10px;
-        background: var(--paper);
-        box-shadow: 0 18px 40px #14281c14;
+        box-shadow: 0 18px 40px #14281c12;
       }
-      .login-panel { padding: 30px 27px; }
+      .login-panel {
+        width: min(460px, 100%);
+        padding: 27px 30px 30px;
+        background: rgba(251, 252, 249, .96);
+        text-align: center;
+      }
       .login-brand {
         display: flex;
         align-items: center;
+        justify-content: center;
         gap: 12px;
-        margin-bottom: 28px;
+        margin-bottom: 20px;
+        text-align: left;
       }
       .brand-mark {
         display: grid;
@@ -77,7 +81,7 @@
         font-weight: 700;
       }
       .login-copy {
-        margin: 0 0 24px;
+        margin: 0 0 20px;
         color: var(--muted);
         font-size: 13px;
         line-height: 1.55;
@@ -96,8 +100,40 @@
         text-decoration: none;
       }
       .google-signin:hover { background: var(--forest-dark); }
-      .architecture-diagrams { display: grid; gap: 14px; min-width: 0; }
-      .diagram-card { min-width: 0; padding: 17px 19px 15px; }
+      .application-overview {
+        width: min(850px, 100%);
+        padding: 21px 30px 23px;
+        border: 1px solid #d5e0d3;
+        border-radius: 10px;
+        background: linear-gradient(120deg, #f8fbf2 0%, #f5faf8 55%, #f1f7f8 100%);
+        box-shadow: 0 12px 30px #14281c0a;
+        text-align: center;
+      }
+      .application-overview .eyebrow { margin-bottom: 7px; }
+      .overview-copy {
+        max-width: 740px;
+        margin: 0 auto;
+        color: #51645a;
+        font-size: 13px;
+        line-height: 1.8;
+      }
+      .architecture-diagrams {
+        display: grid;
+        width: 100%;
+        justify-items: center;
+        gap: 18px;
+        padding-top: 4px;
+      }
+      .diagram-card {
+        width: 100%;
+        min-width: 0;
+        padding: 20px 22px 17px;
+        background: linear-gradient(145deg, #fffefa 0%, #f8fbf7 100%);
+      }
+      .diagram-card:nth-child(2) {
+        background: linear-gradient(145deg, #fbfaff 0%, #f4f8fa 100%);
+        border-color: #d9deeb;
+      }
       .diagram-heading { margin-bottom: 8px; }
       .eyebrow {
         margin: 0 0 4px;
@@ -127,13 +163,17 @@
         line-height: 1.45;
       }
       @media (max-width: 850px) {
-        body { place-items: start center; padding: 22px; }
-        .page-shell { max-width: 650px; grid-template-columns: 1fr; align-items: stretch; gap: 16px; }
-        .login-panel { padding: 26px; }
+        body { padding: 28px 18px 48px; }
+        .page-shell { max-width: 720px; gap: 20px; }
+        .application-overview { padding: 19px 22px 21px; }
+        .diagram-card { padding: 18px 17px 15px; }
       }
       @media (max-width: 480px) {
-        body { padding: 12px; }
-        .login-panel { padding: 23px 20px; }
+        body { padding: 18px 12px 36px; }
+        .page-shell { gap: 16px; }
+        .login-panel { padding: 22px 18px 24px; }
+        .application-overview { padding: 17px 16px 19px; }
+        .overview-copy { font-size: 12px; line-height: 1.75; }
         .diagram-card { padding: 15px 13px 13px; }
         h2 { font-size: 15px; }
       }
@@ -152,6 +192,12 @@
         <h1 id="login-title">Sign in to continue</h1>
         <p class="login-copy">Use a Google account whose verified email matches a datastore user.</p>
         <a class="google-signin" href="/auth/google">Sign in with Google</a>
+      </section>
+
+      <section class="application-overview" aria-labelledby="overview-heading">
+        <p class="eyebrow">ABOUT THE PLATFORM</p>
+        <h2 id="overview-heading">A modular control plane for MCP services</h2>
+        <p class="overview-copy">MCP Uni Hubs is a control plane for organizing users, hubs, and service integrations. It loads application configuration, local identity records, and plugins into a shared runtime. Google sign-in verifies a user's email against a local user record before issuing a signed session. Authenticated users can review application, plugin, secret-store, and hub information in the dashboard. The platform also provides secret resolution and VM orchestration, with provider capabilities determined by the configured integrations.</p>
       </section>
 
       <div class="architecture-diagrams">
