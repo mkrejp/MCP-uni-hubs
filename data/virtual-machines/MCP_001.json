@@ -1,0 +1,18 @@
+{
+  "id": "MCP_001",
+  "name": "MCP_001",
+  "provider": "RAILWAY",
+  "apiType": "railway.serviceCreate",
+  "connection": {
+    "endpoint": "${RAILWAY_API_ENDPOINT}",
+    "projectId": "${RAILWAY_PROJECT_ID}",
+    "environmentId": "${RAILWAY_ENVIRONMENT_ID}",
+    "projectName": "skillful-sparkle"
+  },
+  "spec": {
+    "serviceName": "MCP_001",
+    "image": "${RAILWAY_MCP_001_IMAGE}",
+    "sourceType": "image"
+  },
+  "state": "stopped"
+}

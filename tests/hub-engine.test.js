@@ -162,6 +162,199 @@ test('vm orchestrator plugin reads datastore definitions and dispatches provider
   assert.equal(deleteResult.status, 'deleted');
 });
 
+test('railway vm provider calls GraphQL with runtime token and mocked fetch', async () => {
+  const store = new LocalDataStore('./tmp/vm-railway');
+  const previous = {
+    RAILWAY_TOKEN: process.env.RAILWAY_TOKEN,
+    RAILWAY_API_TOKEN: process.env.RAILWAY_API_TOKEN,
+    RAILWAY_PROJECT_ID: process.env.RAILWAY_PROJECT_ID,
+    RAILWAY_ENVIRONMENT_ID: process.env.RAILWAY_ENVIRONMENT_ID,
+    RAILWAY_MCP_001_IMAGE: process.env.RAILWAY_MCP_001_IMAGE,
+    RAILWAY_API_ENDPOINT: process.env.RAILWAY_API_ENDPOINT,
+  };
+
+  process.env.RAILWAY_TOKEN = 'test-railway-token';
+  delete process.env.RAILWAY_API_TOKEN;
+  process.env.RAILWAY_PROJECT_ID = 'f9236355-ad59-41ce-a087-a359d15c0025';
+  process.env.RAILWAY_ENVIRONMENT_ID = 'efca1cc9-6d2a-4013-b160-7c21e06623c8';
+  process.env.RAILWAY_MCP_001_IMAGE = 'ghcr.io/example/mcp-sample:latest';
+  process.env.RAILWAY_API_ENDPOINT = 'https://backboard.railway.com/graphql/v2';
+
+  await store.write('virtual-machines', 'MCP_001', {
+    id: 'MCP_001',
+    name: 'MCP_001',
+    provider: 'RAILWAY',
+    apiType: 'railway.serviceCreate',
+    connection: {
+      endpoint: '${RAILWAY_API_ENDPOINT}',
+      projectId: '${RAILWAY_PROJECT_ID}',
+      environmentId: '${RAILWAY_ENVIRONMENT_ID}',
+      projectName: 'skillful-sparkle',
+    },
+    spec: {
+      serviceName: 'MCP_001',
+      image: '${RAILWAY_MCP_001_IMAGE}',
+      sourceType: 'image',
+    },
+    state: 'stopped',
+  });
+
+  const calls = [];
+  const originalFetch = global.fetch;
+  global.fetch = async (url, options = {}) => {
+    const body = JSON.parse(options.body || '{}');
+    calls.push({ url, headers: options.headers, body });
+
+    assert.equal(url, 'https://backboard.railway.com/graphql/v2');
+    assert.equal(options.headers.Authorization, 'Bearer test-railway-token');
+
+    if (body.query.includes('serviceCreate')) {
+      assert.equal(body.variables.input.projectId, 'f9236355-ad59-41ce-a087-a359d15c0025');
+      assert.equal(body.variables.input.name, 'MCP_001');
+      assert.equal(body.variables.input.source.image, 'ghcr.io/example/mcp-sample:latest');
+      assert.equal(JSON.stringify(body).includes('test-railway-token'), false);
+      return {
+        ok: true,
+        async json() {
+          return { data: { serviceCreate: { id: 'svc-mcp-001', name: 'MCP_001' } } };
+        },
+      };
+    }
+
+    if (body.query.includes('serviceInstanceDeployV2')) {
+      return {
+        ok: true,
+        async json() {
+          return { data: { serviceInstanceDeployV2: 'dep-start-1' } };
+        },
+      };
+    }
+
+    if (body.query.includes('query deployments')) {
+      return {
+        ok: true,
+        async json() {
+          return {
+            data: {
+              deployments: {
+                edges: [{ node: { id: 'dep-running-1', status: 'SUCCESS', createdAt: '2026-01-01T00:00:00Z' } }],
+              },
+            },
+          };
+        },
+      };
+    }
+
+    if (body.query.includes('deploymentStop')) {
+      assert.equal(body.variables.id, 'dep-running-1');
+      return { ok: true, async json() { return { data: { deploymentStop: true } }; } };
+    }
+
+    if (body.query.includes('serviceDelete')) {
+      assert.equal(body.variables.id, 'svc-mcp-001');
+      return { ok: true, async json() { return { data: { serviceDelete: true } }; } };
+    }
+
+    throw new Error(`Unexpected GraphQL operation: ${body.query.slice(0, 80)}`);
+  };
+
+  try {
+    const loader = new PluginLoader({
+      pluginDirectories: ['./plugins'],
+      appContext: { datastore: store },
+    });
+    const loaded = await loader.loadAll();
+    const orchestrator = loaded.find((plugin) => plugin.name === 'vm-orchestrator');
+    assert.ok(orchestrator);
+
+    const createResult = await orchestrator.plugin.createVm('MCP_001');
+    assert.equal(createResult.provider, 'RAILWAY');
+    assert.equal(createResult.status, 'created');
+    assert.equal(createResult.serviceId, 'svc-mcp-001');
+
+    const afterCreate = await store.read('virtual-machines', 'MCP_001');
+    assert.equal(afterCreate.connection.serviceId, 'svc-mcp-001');
+    assert.equal(afterCreate.connection.projectId, '${RAILWAY_PROJECT_ID}');
+    assert.equal(Object.prototype.hasOwnProperty.call(afterCreate.connection, 'token'), false);
+
+    const startResult = await orchestrator.plugin.startVm('MCP_001');
+    assert.equal(startResult.status, 'running');
+    assert.equal(startResult.deploymentId, 'dep-start-1');
+
+    const stopResult = await orchestrator.plugin.stopVm('MCP_001');
+    assert.equal(stopResult.status, 'stopped');
+    assert.equal(stopResult.deploymentId, 'dep-running-1');
+
+    const deleteResult = await orchestrator.plugin.deleteVm('MCP_001');
+    assert.equal(deleteResult.status, 'deleted');
+
+    assert.ok(calls.length >= 5);
+  } finally {
+    global.fetch = originalFetch;
+    for (const [key, value] of Object.entries(previous)) {
+      if (value === undefined) {
+        delete process.env[key];
+      } else {
+        process.env[key] = value;
+      }
+    }
+  }
+});
+
+test('railway vm provider rejects actions when runtime token is missing', async () => {
+  const store = new LocalDataStore('./tmp/vm-railway-missing-token');
+  const previousToken = process.env.RAILWAY_TOKEN;
+  const previousAlias = process.env.RAILWAY_API_TOKEN;
+  delete process.env.RAILWAY_TOKEN;
+  delete process.env.RAILWAY_API_TOKEN;
+  process.env.RAILWAY_PROJECT_ID = 'f9236355-ad59-41ce-a087-a359d15c0025';
+  process.env.RAILWAY_ENVIRONMENT_ID = 'efca1cc9-6d2a-4013-b160-7c21e06623c8';
+
+  await store.write('virtual-machines', 'MCP_001', {
+    id: 'MCP_001',
+    name: 'MCP_001',
+    provider: 'RAILWAY',
+    connection: {
+      projectId: '${RAILWAY_PROJECT_ID}',
+      environmentId: '${RAILWAY_ENVIRONMENT_ID}',
+    },
+    spec: { image: 'ubuntu:latest' },
+    state: 'stopped',
+  });
+
+  const originalFetch = global.fetch;
+  let fetchCalled = false;
+  global.fetch = async () => {
+    fetchCalled = true;
+    throw new Error('fetch should not be called without a token');
+  };
+
+  try {
+    const loader = new PluginLoader({
+      pluginDirectories: ['./plugins'],
+      appContext: { datastore: store },
+    });
+    const orchestrator = (await loader.loadAll()).find((plugin) => plugin.name === 'vm-orchestrator');
+    await assert.rejects(
+      () => orchestrator.plugin.createVm('MCP_001'),
+      /RAILWAY_TOKEN/,
+    );
+    assert.equal(fetchCalled, false);
+  } finally {
+    global.fetch = originalFetch;
+    if (previousToken === undefined) {
+      delete process.env.RAILWAY_TOKEN;
+    } else {
+      process.env.RAILWAY_TOKEN = previousToken;
+    }
+    if (previousAlias === undefined) {
+      delete process.env.RAILWAY_API_TOKEN;
+    } else {
+      process.env.RAILWAY_API_TOKEN = previousAlias;
+    }
+  }
+});
+
 test('access control plugin grants or denies plugin and function access by org, group, and acl', async () => {
   const datastore = new LocalDataStore('./tmp/access-control');
   const accessPlugin = new AccessControlPlugin({ datastore });
@@ -325,6 +518,17 @@ test('config loader reads single env file and bootstraps testmaster environment'
   assert.equal(await accessControl.canAccess('monitorer', 'vm-orchestrator', 'read', 'plugin'), true);
   assert.equal(await accessControl.canAccess('monitorer', 'vm-orchestrator', 'deleteVm', 'plugin'), false);
   assert.equal(await accessControl.canAccess('monitorer', 'users', 'read', 'data-area'), true);
+
+  const userrail = await datastore.read('users', 'userrail');
+  const railwayGroup = await datastore.read('groups', 'railway-operators');
+  const userrailAcl = await datastore.read('acls', 'userrail-vm-orchestrator');
+  assert.equal(userrail.username, 'userrail');
+  assert.equal(userrail.groupIds.includes('railway-operators'), true);
+  assert.equal(railwayGroup.organizationId, 'org-platform');
+  assert.equal(userrailAcl.resourceId, 'vm-orchestrator');
+  assert.equal(await accessControl.canAccess('userrail', 'vm-orchestrator', 'createVm', 'plugin'), true);
+  assert.equal(await accessControl.canAccess('userrail', 'vm-orchestrator', 'deleteVm', 'plugin'), true);
+  assert.equal(await accessControl.canAccess('userrail', 'secrets-manager', 'read', 'plugin'), false);
 });
 
 test('config loader resolves store tokens from env and does not persist credentials', async () => {

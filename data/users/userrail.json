@@ -1,0 +1,12 @@
+{
+  "id": "userrail",
+  "username": "userrail",
+  "email": "userrail@example.com",
+  "organizationId": "org-platform",
+  "groupIds": [
+    "railway-operators"
+  ],
+  "roles": [
+    "vm-operator"
+  ]
+}

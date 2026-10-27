@@ -22,7 +22,7 @@ Start at [docs/README.md](docs/README.md), select one reference for the current 
 - Use `npm test` after behavior changes. The project uses Node.js built-ins and ES modules; avoid dependencies without a concrete need.
 - `SECRETARIO_TOKEN` is supplied at runtime. Never commit or persist usable credentials.
 - `tmp/` and `logs/` are generated. Do not include them in changes.
-- A configured secret store is not necessarily reachable. VM provider calls and SQL storage are prototypes; see the component reference.
+- A configured secret store is not necessarily reachable. SQL storage and most VM providers are prototypes; the Railway VM provider uses live GraphQL when `RAILWAY_TOKEN` / `RAILWAY_API_TOKEN` is set. See the component and Railway platform references.
 - Preserve existing user data and unrelated working-tree changes.
 
 ## Tool Adapters

@@ -1,0 +1,10 @@
+{
+  "id": "railway-operators-vm-orchestrator",
+  "subjectType": "group",
+  "subjectId": "railway-operators",
+  "resourceType": "plugin",
+  "resourceId": "vm-orchestrator",
+  "action": "*",
+  "effect": "allow",
+  "organizationId": "org-platform"
+}

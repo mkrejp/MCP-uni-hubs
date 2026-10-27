@@ -73,6 +73,8 @@ There is no explicit deny-priority rule or conflict resolution across user and g
 
 `testmaster` has `action: "*"` entries for `secrets-manager` and `vm-orchestrator`, so any action checked for those resource IDs is allowed by the decision service.
 
+`userrail` (group `railway-operators`) has `action: "*"` on `vm-orchestrator` (direct user ACL and matching group ACL) so Railway sample operations for `MCP_001` are allowed by the decision service.
+
 ## Enforcement Requirements for New Operations
 
 Before adding or exposing a protected operation:

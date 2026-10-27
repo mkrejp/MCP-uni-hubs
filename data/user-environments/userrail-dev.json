@@ -1,0 +1,13 @@
+{
+  "id": "userrail-dev",
+  "userId": "userrail",
+  "name": "dev",
+  "organizationId": "org-platform",
+  "secretRefs": [
+    {
+      "key": "DB_PASSWORD",
+      "store": "secretario",
+      "path": "app/userrail/dev"
+    }
+  ]
+}
