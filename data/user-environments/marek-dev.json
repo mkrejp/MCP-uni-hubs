@@ -1,0 +1,13 @@
+{
+  "id": "marek-dev",
+  "userId": "marek",
+  "name": "dev",
+  "organizationId": "org-platform",
+  "secretRefs": [
+    {
+      "key": "DB_PASSWORD",
+      "store": "secretario",
+      "path": "app/marek/dev"
+    }
+  ]
+}
