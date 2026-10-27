@@ -26,6 +26,10 @@ The dashboard is served at `http://localhost:3000`. It shows the active applicat
 - [src/web-server.js](src/web-server.js): web dashboard server
 - [src/app-runtime.js](src/app-runtime.js): shared application startup and dashboard data
 - [tests/hub-engine.test.js](tests/hub-engine.test.js): smoke tests for the registry
+- [AGENTS.md](AGENTS.md): repository guide for AI coding agents
+- [docs/architecture.md](docs/architecture.md): startup flow, components, and current integration boundaries
+- [.github/copilot-instructions.md](.github/copilot-instructions.md): repository-wide Copilot rules
+- [.github/skills](.github/skills): focused workflows for plugin and secret-store changes
 
 ## Universal connection manager
 
