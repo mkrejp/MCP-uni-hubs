@@ -109,6 +109,10 @@ test('unauthenticated / serves dedicated login page', async () => {
       assert.equal(response.status, 200);
       assert.match(html, /Sign in with Google/i);
       assert.match(html, /href="\/auth\/google"/);
+      assert.match(html, /id="overview-heading"/);
+      const overview = html.match(/class="overview-copy">([^<]+)<\/p>/)?.[1];
+      assert.ok(overview);
+      assert.equal((overview.match(/[.!?](?:\s|$)/g) || []).length, 5);
       assert.match(html, /Application flows/);
       assert.match(html, /Solution architecture/);
       assert.match(html, /flow-description/);
