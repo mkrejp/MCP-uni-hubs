@@ -5,10 +5,11 @@
   "type": "module",
   "main": "src/index.js",
   "scripts": {
-    "start": "node src/index.js",
-    "dev": "node --watch src/index.js",
+    "start": "node src/web-server.js",
+    "dev": "node --watch src/web-server.js",
     "web": "node src/web-server.js",
     "web:dev": "node --watch src/web-server.js",
+    "cli": "node src/index.js",
     "test": "node --test"
   }
 }

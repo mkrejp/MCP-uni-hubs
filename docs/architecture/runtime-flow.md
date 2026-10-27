@@ -14,7 +14,7 @@ Both application entry points use `createApplicationRuntime()` from `src/app-run
 
 ## CLI Flow
 
-`src/index.js` checks `isMainModule()`. When run as `npm start`, it calls `createApplicationRuntime()` and prints `runtime.summary` as JSON. Importing the module from a test does not start the app. It re-exports core types and the runtime factory.
+`src/index.js` checks `isMainModule()`. When run as `npm run cli`, it calls `createApplicationRuntime()` and prints `runtime.summary` as JSON. Importing the module from a test does not start the app. It re-exports core types and the runtime factory. `npm start` runs the web dashboard (`src/web-server.js`), not this CLI summary.
 
 ## Dashboard Flow
 
