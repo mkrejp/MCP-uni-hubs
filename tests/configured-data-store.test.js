@@ -5,6 +5,7 @@ import { resolve } from 'node:path';
 
 import {
   createConfiguredDataStore,
+  getDatastoreRoutes,
   getPostgresConfigFromEnvironment,
 } from '../src/configured-data-store.js';
 import { createApplicationRuntime } from '../src/app-runtime.js';
@@ -119,6 +120,35 @@ test('default runtime configs use PostgreSQL only for identity and ACL datastore
     assert.equal(config.datastores.stores.type, 'file');
     assert.equal(config.datastores['virtual-machines'].type, 'file');
   }
+});
+
+test('datastore routing summary shows PostgreSQL tables and local JSON paths', () => {
+  const routes = getDatastoreRoutes({
+    users: { type: 'postgres' },
+    reports: { type: 'file' },
+    audit: { type: 'postgres', table: 'audit_records' },
+  });
+
+  assert.deepEqual(routes.find(({ area }) => area === 'users'), {
+    area: 'users',
+    backend: 'PostgreSQL',
+    location: 'Table: users',
+  });
+  assert.deepEqual(routes.find(({ area }) => area === 'reports'), {
+    area: 'reports',
+    backend: 'Local files',
+    location: 'data/reports/*.json',
+  });
+  assert.deepEqual(routes.find(({ area }) => area === 'audit'), {
+    area: 'audit',
+    backend: 'PostgreSQL',
+    location: 'Table: audit_records',
+  });
+  assert.deepEqual(routes.find(({ area }) => area === 'stores'), {
+    area: 'stores',
+    backend: 'Local files',
+    location: 'data/stores/*.json',
+  });
 });
 
 test('configured datastore rejects missing PostgreSQL settings and unsafe table names', () => {

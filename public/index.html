@@ -18,6 +18,7 @@
         <div class="nav-label">CONTROL PLANE</div>
         <nav>
           <a class="nav-item active" href="#overview"><span class="nav-icon" aria-hidden="true">◫</span>Overview</a>
+          <a class="nav-item" href="#datastores"><span class="nav-icon" aria-hidden="true">▤</span>Datastores</a>
           <a class="nav-item" href="#plugins"><span class="nav-icon" aria-hidden="true">⌘</span>Plugins</a>
           <a class="nav-item" href="#stores"><span class="nav-icon" aria-hidden="true">◈</span>Secret stores</a>
           <a class="nav-item" href="#users"><span class="nav-icon" aria-hidden="true">◎</span>Users</a>
@@ -83,10 +84,19 @@
           <dl id="config-list" class="config-grid"><div class="loading-line">Loading configuration…</div></dl>
         </section>
 
+        <section id="datastores" class="section-block" aria-labelledby="datastores-title">
+          <div class="section-heading">
+            <div><p class="eyebrow">PERSISTENCE</p><h2 id="datastores-title">Datastore routing</h2></div>
+            <span class="section-index">02</span>
+          </div>
+          <p class="section-note">Configured backend by data area. This shows routing, not a live connectivity check.</p>
+          <div id="datastores-list" class="datastore-list"><div class="loading-line">Loading datastores…</div></div>
+        </section>
+
         <section id="plugins" class="section-block" aria-labelledby="plugins-title">
           <div class="section-heading">
             <div><p class="eyebrow">EXTENSIONS</p><h2 id="plugins-title">Loaded plugins</h2></div>
-            <span class="section-index">02</span>
+            <span class="section-index">03</span>
           </div>
           <div id="plugins-list" class="plugin-list"><div class="loading-line">Loading plugins…</div></div>
         </section>
@@ -94,7 +104,7 @@
         <section id="stores" class="section-block" aria-labelledby="stores-title">
           <div class="section-heading">
             <div><p class="eyebrow">CREDENTIAL BACKENDS</p><h2 id="stores-title">Secret stores</h2></div>
-            <span class="section-index">03</span>
+            <span class="section-index">04</span>
           </div>
           <div id="stores-list" class="store-grid"><div class="loading-line">Loading stores…</div></div>
         </section>

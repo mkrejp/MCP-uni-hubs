@@ -3,6 +3,7 @@ const storeCount = document.querySelector('#store-count');
 const userCount = document.querySelector('#user-count');
 const hubHealth = document.querySelector('#hub-health');
 const configList = document.querySelector('#config-list');
+const datastoresList = document.querySelector('#datastores-list');
 const pluginsList = document.querySelector('#plugins-list');
 const storesList = document.querySelector('#stores-list');
 const usersTable = document.querySelector('#users-table');
@@ -63,6 +64,22 @@ function renderPlugins(plugins) {
     const status = makeElement('span', 'plugin-status');
     status.append(makeElement('span', 'status-pip'), document.createTextNode(plugin.status));
     row.append(name, status);
+    return row;
+  }));
+}
+
+function renderDatastores(datastores) {
+  if (!datastores.length) {
+    datastoresList.replaceChildren(makeElement('div', 'loading-line', 'No datastores configured.'));
+    return;
+  }
+  datastoresList.replaceChildren(...datastores.map((datastore) => {
+    const row = makeElement('div', 'datastore-row');
+    row.append(
+      makeElement('span', 'datastore-area', datastore.area),
+      makeElement('span', `datastore-backend ${datastore.backend === 'PostgreSQL' ? 'sql' : 'local'}`, datastore.backend),
+      makeElement('span', 'datastore-location', datastore.location),
+    );
     return row;
   }));
 }
@@ -140,6 +157,7 @@ async function loadDashboard() {
     userCount.textContent = String(data.users.length);
     hubHealth.textContent = `${data.hubStatus.healthy}/${data.hubStatus.total}`;
     renderConfig(data.application);
+    renderDatastores(data.datastores);
     renderPlugins(data.plugins);
     renderStores(data.stores);
     allUsers = data.users;

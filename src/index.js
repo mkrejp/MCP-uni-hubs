@@ -4,6 +4,7 @@ import { UniversalConnectionManager } from './data-connection-manager.js';
 import {
   ConfiguredDataStore,
   createConfiguredDataStore,
+  getDatastoreRoutes,
   getPostgresConfigFromEnvironment,
 } from './configured-data-store.js';
 import { LocalDataStore, PluginLoader } from './local-data-store.js';
@@ -21,6 +22,7 @@ export {
   UniversalConnectionManager,
   ConfiguredDataStore,
   createConfiguredDataStore,
+  getDatastoreRoutes,
   getPostgresConfigFromEnvironment,
   LocalDataStore,
   PluginLoader,

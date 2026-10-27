@@ -5,6 +5,15 @@ const DEFAULT_TABLE_NAMES = {
   'user-environments': 'user_environments',
   'virtual-machines': 'virtual_machines',
 };
+const STANDARD_DATASTORE_AREAS = [
+  'organizations',
+  'groups',
+  'users',
+  'stores',
+  'user-environments',
+  'acls',
+  'virtual-machines',
+];
 
 function resolveTableName(area, table) {
   const tableName = table || DEFAULT_TABLE_NAMES[area] || area.replaceAll('-', '_');
@@ -12,6 +21,30 @@ function resolveTableName(area, table) {
     throw new Error(`Invalid PostgreSQL table name configured for datastore "${area}"`);
   }
   return tableName;
+}
+
+export function getDatastoreRoutes(areas = {}) {
+  areas ||= {};
+  const allAreas = [...new Set([...STANDARD_DATASTORE_AREAS, ...Object.keys(areas)])];
+  return allAreas.map((area) => {
+    const config = areas[area];
+    const type = String(config?.type || 'file').toLowerCase();
+    if (type !== 'file' && type !== 'postgres') {
+      throw new Error(`Unsupported datastore type "${type}" for area "${area}"`);
+    }
+
+    return type === 'postgres'
+      ? {
+        area,
+        backend: 'PostgreSQL',
+        location: `Table: ${resolveTableName(area, config.table)}`,
+      }
+      : {
+        area,
+        backend: 'Local files',
+        location: `data/${area}/*.json`,
+      };
+  });
 }
 
 export function getPostgresConfigFromEnvironment(environment = process.env) {

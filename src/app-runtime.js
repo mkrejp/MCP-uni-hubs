@@ -2,7 +2,11 @@ import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { HubRegistry, McpHub, buildHubSummary, createDefaultRegistry } from './hub-engine.js';
 import { PluginLoader } from './local-data-store.js';
-import { createConfiguredDataStore, getPostgresConfigFromEnvironment } from './configured-data-store.js';
+import {
+  createConfiguredDataStore,
+  getDatastoreRoutes,
+  getPostgresConfigFromEnvironment,
+} from './configured-data-store.js';
 import { createDefaultLogger } from './logger.js';
 import { ConfigLoader, bootstrapEnvironmentData } from './config-loader.js';
 
@@ -128,6 +132,7 @@ export async function buildDashboardData(runtime) {
       instanceId: runtime.logger.instanceId,
     },
     plugins: runtime.plugins.map(({ name }) => ({ name, status: 'Loaded' })),
+    datastores: getDatastoreRoutes(runtime.startupConfig.datastores),
     stores,
     users,
     hubStatus: runtime.summary.status,

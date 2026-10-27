@@ -195,6 +195,12 @@ test('valid session cookie serves dashboard HTML and /api/dashboard 200', async 
       assert.equal(response.status, 200);
       const dashboard = await response.json();
       assert.equal(dashboard.users[0].username, 'testmaster');
+      assert.deepEqual(dashboard.datastores.find(({ area }) => area === 'users'), {
+        area: 'users',
+        backend: 'Local files',
+        location: 'data/users/*.json',
+      });
+      assert.equal(dashboard.datastores.find(({ area }) => area === 'acls').backend, 'Local files');
       assert.equal(JSON.stringify(dashboard).includes('must-not-be-returned'), false);
     } finally {
       await closeServer(server);
