@@ -1,0 +1,7 @@
+# Railway service process: long-running web dashboard (not the CLI summary).
+# Public HTTPS is terminated at the Railway edge (:443). The container listens
+# on $PORT (commonly 8080 on this deploy). Do not point clients at :8080 on the
+# custom domain.
+
+[deploy]
+startCommand = "npm start"

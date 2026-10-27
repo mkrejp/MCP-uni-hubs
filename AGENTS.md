@@ -29,4 +29,4 @@ Start at [docs/README.md](docs/README.md), select one reference for the current 
 
 - Cursor: load the matching `.cursor/rules/*.mdc` file; rules are intentionally scoped.
 - GitHub Copilot: use `.github/copilot-instructions.md`, matching `.github/instructions/*.instructions.md`, and task-specific skills.
-- Railway: use the Railway operations guide. No Railway deployment manifest is currently committed.
+- Railway: use the Railway operations guide. Deploy start command is in `railway.toml` (`npm start` → web dashboard).
