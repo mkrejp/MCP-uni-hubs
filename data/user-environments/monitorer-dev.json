@@ -1,0 +1,13 @@
+{
+  "id": "monitorer-dev",
+  "userId": "monitorer",
+  "name": "dev",
+  "organizationId": "org-platform",
+  "secretRefs": [
+    {
+      "key": "DB_PASSWORD",
+      "store": "secretario",
+      "path": "app/monitorer/dev"
+    }
+  ]
+}

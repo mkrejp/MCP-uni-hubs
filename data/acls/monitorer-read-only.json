@@ -1,0 +1,10 @@
+{
+  "id": "monitorer-read-only",
+  "subjectType": "user",
+  "subjectId": "monitorer",
+  "resourceType": "*",
+  "resourceId": "*",
+  "action": "read",
+  "effect": "allow",
+  "organizationId": "org-platform"
+}

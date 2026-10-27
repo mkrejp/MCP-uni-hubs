@@ -1,0 +1,12 @@
+{
+  "id": "testmaster",
+  "username": "testmaster",
+  "email": "testmaster@example.com",
+  "organizationId": "org-platform",
+  "groupIds": [
+    "platform-admins"
+  ],
+  "roles": [
+    "admin"
+  ]
+}
