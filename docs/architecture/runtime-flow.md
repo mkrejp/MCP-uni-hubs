@@ -22,14 +22,17 @@ Both application entry points use `createApplicationRuntime()` from `src/app-run
 
 | Request | Behavior |
 | --- | --- |
-| `GET /` | Serves `public/index.html` |
-| `GET /app.js` | Serves dashboard browser code |
-| `GET /styles.css` | Serves dashboard styles |
-| `GET /api/dashboard` | Calls `buildDashboardData(runtime)` and returns a sanitized snapshot |
+| `GET /` | Serves `public/login.html` without a session; serves `public/index.html` with a valid session |
+| `GET /auth/google` | Starts Google OAuth and sets a short-lived state cookie |
+| `GET /auth/google/callback` | Validates state, exchanges the code, verifies the Google email, matches a local user, and issues a signed session cookie |
+| `GET /app.js`, `GET /styles.css` | Serves dashboard assets to authenticated users |
+| `GET /api/me` | Returns the authenticated user's identity or 401 |
+| `GET /api/dashboard` | Requires a valid session, then calls `buildDashboardData(runtime)` and returns a sanitized snapshot |
+| `GET` or `POST /auth/logout` | Clears the session cookie and redirects to `/` |
 | Other paths | 404 |
-| Non-GET methods | 405 |
+| Unsupported methods | 405 |
 
-`buildDashboardData()` reads user records from the datastore but only selects identity fields (`id`, `username`, `email`, `organizationId`, `groupIds`, `roles`). Store metadata is selected from runtime config without token/header fields. `status: "Configured"` is metadata, not a health probe. The API has no authentication middleware in the current implementation.
+The login page at `public/login.html` includes diagrams of the OAuth/dashboard request lifecycle and the solution's component boundaries. `buildDashboardData()` reads user records from the datastore but only selects identity fields (`id`, `username`, `email`, `organizationId`, `groupIds`, `roles`). Store metadata is selected from runtime config without token/header fields. `status: "Configured"` is metadata, not a health probe.
 
 ## Secrets Resolution Flow
 
