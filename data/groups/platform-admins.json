@@ -1,0 +1,6 @@
+{
+  "id": "platform-admins",
+  "name": "Platform Admins",
+  "organizationId": "org-platform",
+  "description": "Administrators for the platform environment."
+}

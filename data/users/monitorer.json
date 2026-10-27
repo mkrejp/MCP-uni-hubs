@@ -1,0 +1,12 @@
+{
+  "id": "monitorer",
+  "username": "monitorer",
+  "email": "monitorer@example.com",
+  "organizationId": "org-platform",
+  "groupIds": [
+    "platform-readers"
+  ],
+  "roles": [
+    "reader"
+  ]
+}

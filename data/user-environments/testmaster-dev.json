@@ -1,0 +1,13 @@
+{
+  "id": "testmaster-dev",
+  "userId": "testmaster",
+  "name": "dev",
+  "organizationId": "org-platform",
+  "secretRefs": [
+    {
+      "key": "DB_PASSWORD",
+      "store": "secretario",
+      "path": "app/testmaster/dev"
+    }
+  ]
+}

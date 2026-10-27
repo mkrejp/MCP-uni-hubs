@@ -1,0 +1,18 @@
+{
+  "id": "demo-web-aws",
+  "name": "demo-web-aws",
+  "provider": "AWS",
+  "apiType": "ec2.create_instances",
+  "connection": {
+    "region": "us-east-1",
+    "accessKeyId": "demo-access-key",
+    "secretAccessKey": "demo-secret-key",
+    "endpoint": "https://ec2.us-east-1.amazonaws.com"
+  },
+  "spec": {
+    "instanceType": "t3.micro",
+    "imageId": "ami-12345678",
+    "subnetId": "subnet-demo-01"
+  },
+  "state": "stopped"
+}

@@ -1,0 +1,10 @@
+{
+  "id": "testmaster-vm-orchestrator",
+  "subjectType": "user",
+  "subjectId": "testmaster",
+  "resourceType": "plugin",
+  "resourceId": "vm-orchestrator",
+  "action": "*",
+  "effect": "allow",
+  "organizationId": "org-platform"
+}

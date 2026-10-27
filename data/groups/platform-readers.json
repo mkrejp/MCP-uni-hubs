@@ -1,0 +1,6 @@
+{
+  "id": "platform-readers",
+  "name": "Platform Readers",
+  "organizationId": "org-platform",
+  "description": "Read-only access to platform resources."
+}

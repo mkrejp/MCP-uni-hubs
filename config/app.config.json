@@ -1,0 +1,22 @@
+{
+  "stores": {
+    "secretario": {
+      "name": "secretario",
+      "host": "secretario.railway.internal",
+      "port": 8200,
+      "protocol": "http",
+      "address": "http://secretario.railway.internal:8200",
+      "token": "${SECRETARIO_TOKEN}",
+      "headers": {
+        "X-Vault-Token": "${SECRETARIO_TOKEN}"
+      },
+      "kv": {
+        "engine": "kv-v2",
+        "mount": "secret",
+        "dataPath": "/v1/secret/data/<path>"
+      },
+      "healthCheck": "http://secretario.railway.internal:8200/v1/sys/health",
+      "type": "Secretario"
+    }
+  }
+}
