@@ -1,0 +1,12 @@
+{
+  "id": "marek",
+  "username": "marek",
+  "email": "marek.krejpsky@gmail.com",
+  "organizationId": "org-platform",
+  "groupIds": [
+    "platform-admins"
+  ],
+  "roles": [
+    "admin"
+  ]
+}

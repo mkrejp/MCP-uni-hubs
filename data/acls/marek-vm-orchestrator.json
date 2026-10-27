@@ -1,0 +1,10 @@
+{
+  "id": "marek-vm-orchestrator",
+  "subjectType": "user",
+  "subjectId": "marek",
+  "resourceType": "plugin",
+  "resourceId": "vm-orchestrator",
+  "action": "*",
+  "effect": "allow",
+  "organizationId": "org-platform"
+}
