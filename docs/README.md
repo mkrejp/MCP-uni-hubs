@@ -4,6 +4,8 @@ Use the smallest relevant context set. Start with `AGENTS.md`; load one task-spe
 
 | Work item | Minimum context |
 | --- | --- |
+| Top-level solution architecture (context, components, MCP surface, security) | [ARCHITECTURE.md](ARCHITECTURE.md) |
+| Network trust boundaries, ports, connection inventory | [CONNECTIVITY.md](CONNECTIVITY.md) |
 | Startup/runtime function flow | [architecture/runtime-flow.md](architecture/runtime-flow.md) |
 | Config, JSON stores, or record shape | [architecture/data-models.md](architecture/data-models.md) |
 | Plugin implementation or registration | [architecture/components.md](architecture/components.md), then the [Cursor plugin skill](../.cursor/skills/plugin-development/SKILL.md) or [GitHub plugin skill](../.github/skills/plugin-development/SKILL.md) |
