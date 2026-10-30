@@ -58,6 +58,8 @@ See [docs/platforms/railway.md](docs/platforms/railway.md) for the full variable
 
 - [Agent and tool routing](AGENTS.md)
 - [Task-based documentation map](docs/README.md)
+- [Solution architecture](docs/ARCHITECTURE.md)
+- [Connectivity](docs/CONNECTIVITY.md)
 - [Architecture index](docs/architecture.md)
 - [Detailed architecture references](docs/architecture/)
 - [Railway operations](docs/platforms/railway.md)

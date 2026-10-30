@@ -4,6 +4,8 @@ This is a routing page, not a full-system dump. Open one detailed reference for 
 
 | Need | Reference |
 | --- | --- |
+| Top-level purpose, system context, MCP surface, security overview | [Solution Architecture](ARCHITECTURE.md) |
+| Trust boundaries, inbound/outbound edges, connection inventory | [Connectivity](CONNECTIVITY.md) |
 | CLI/dashboard boot sequence, function calls, and request flow | [Runtime Flow](architecture/runtime-flow.md) |
 | JSON shapes, config schema, identifiers, and persistence | [Data Models](architecture/data-models.md) |
 | Module responsibilities, public functions, and prototype boundaries | [Components](architecture/components.md) |
